@@ -1,0 +1,3 @@
+option('tests', type: 'feature', value: 'disabled', description: 'Build tests')
+option('compression_tests', type: 'feature', value: 'disabled', description: 'Build compressor and decoder tests')
+option('examples', type: 'feature', value: 'disabled', description: 'Build examples')
