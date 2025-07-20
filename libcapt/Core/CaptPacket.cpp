@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 namespace Capt {
-    CaptPacket::CaptPacket() noexcept {}
+    CaptPacket::CaptPacket() noexcept : CaptPacket(0) {}
     CaptPacket::CaptPacket(uint16_t opcode) noexcept : Opcode(opcode) {}
     CaptPacket::CaptPacket(uint16_t opcode, std::vector<uint8_t> payload) noexcept : Opcode(opcode), Payload(payload) {}
 

@@ -16,7 +16,7 @@ namespace Capt {
         }
     }
 
-    CaptPrinter::CaptPrinter(std::iostream& stream) : stream(stream) {}
+    CaptPrinter::CaptPrinter(std::iostream& stream) : stream(stream), status(Protocol::ExtendedStatus()) {}
 
     Protocol::ExtendedStatus CaptPrinter::updateStatus() {
         Protocol::ExtendedStatus ex = Protocol::GetExtendedStatus(this->stream);
