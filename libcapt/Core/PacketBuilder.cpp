@@ -26,7 +26,7 @@ namespace Capt {
         this->AppendBytes(buffer, sizeof(buffer));
     }
 
-    void PacketBuilder::AppendBytes(uint8_t* data, int count) {
+    void PacketBuilder::AppendBytes(uint8_t* data, std::size_t count) {
         if ((this->Packet.Size() + count) > MaxPacketSize) {
             throw std::overflow_error("Packet size overflow");
         }

@@ -13,13 +13,13 @@ namespace Capt::Compression {
         this->setg(start, end, end);
     }
 
-    std::size_t cmd_Copy(std::vector<uint8_t>& buffer, int copyCount) {
+    std::size_t cmd_Copy(std::vector<uint8_t>& buffer, unsigned copyCount) {
         if (copyCount == 0) {
             return 0;
         }
         std::size_t vsize = 0;
         while (copyCount >= 8) {
-            int copy = std::min(copyCount, 255);
+            unsigned copy = std::min(copyCount, 255u);
             copy = copy - (copy % 8);
             vsize += ScoaCmd::CopyLong(buffer, copy);
             copyCount -= copy;
@@ -31,14 +31,14 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, int copyCount, const uint8_t* rawData, int rawCount) {
+    std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, const uint8_t* rawData, unsigned rawCount) {
         if (copyCount == 0 && rawCount == 0) {
             return 0;
         }
         std::size_t vsize = 0;
         if (copyCount <= 7) {
             while (rawCount >= 8) {
-                int count = std::min(rawCount, 255);
+                unsigned count = std::min(rawCount, 255u);
                 vsize += ScoaCmd::CopyThenRawLong(buffer, copyCount, rawData, count);
                 copyCount = 0;
                 rawData += count;
@@ -49,7 +49,7 @@ namespace Capt::Compression {
             }
         } else {
             while (copyCount >= 8) {
-                int copy = std::min(copyCount, 248);
+                unsigned copy = std::min(copyCount, 248u);
                 copy = copy - (copy % 8);
                 vsize += ScoaCmd::CopyLong(buffer, copy);
                 copyCount -= copy;
@@ -59,7 +59,7 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, const uint8_t* rawData, int rawCount) {
+    std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, const uint8_t* rawData, unsigned rawCount) {
         if (rawCount == 0) {
             return 0;
         }
@@ -68,7 +68,7 @@ namespace Capt::Compression {
             vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
         } else {
             while (rawCount >= 8) {
-                int count = std::min(rawCount, 255);
+                unsigned count = std::min(rawCount, 255u);
                 vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData, count);
                 rawData += count;
                 rawCount -= count;
@@ -80,7 +80,7 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, int repeatCount, uint8_t repeatByte, const uint8_t* rawData, int rawCount) {
+    std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, const uint8_t* rawData, unsigned rawCount) {
         if (repeatCount == 0 && rawCount == 0) {
             return 0;
         }
@@ -108,7 +108,7 @@ namespace Capt::Compression {
                     vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 }
                 while (rawCount >= 8) {
-                    int count = std::min(rawCount, 255);
+                    unsigned count = std::min(rawCount, 255u);
                     vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData, count);
                     rawData += count;
                     rawCount -= count;
@@ -119,7 +119,7 @@ namespace Capt::Compression {
             }
         } else {
             while (repeatCount >= 8) {
-                int count = std::min(repeatCount, 255);
+                unsigned count = std::min(repeatCount, 255u);
                 vsize += ScoaCmd::CopyThenRepeatLong(buffer, 0, count, repeatByte);
                 repeatCount -= count;
             }
@@ -128,14 +128,14 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, int copyCount, int repeatCount, uint8_t repeatByte) {
+    std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, unsigned copyCount, unsigned repeatCount, uint8_t repeatByte) {
         if (repeatCount == 0 && copyCount == 0) {
             return 0;
         }
         std::size_t vsize = 0;
         if (copyCount <= 7) {
             while (repeatCount >= 8) {
-                int rep = std::min(repeatCount, 255);
+                unsigned rep = std::min(repeatCount, 255u);
                 vsize += ScoaCmd::CopyThenRepeatLong(buffer, copyCount, rep, repeatByte);
                 copyCount = 0;
                 repeatCount -= rep;
@@ -145,7 +145,7 @@ namespace Capt::Compression {
             }
         } else {
             while (copyCount >= 8) {
-                int copy = std::min(copyCount, 248);
+                unsigned copy = std::min(copyCount, 248u);
                 copy = copy - (copy % 8);
                 vsize += ScoaCmd::CopyLong(buffer, copy);
                 copyCount -= copy;

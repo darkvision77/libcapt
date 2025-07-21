@@ -14,7 +14,7 @@ namespace Capt {
         void AppendByte(uint8_t value);
         void AppendUint16(uint16_t value);
         void AppendUint32(uint32_t value);
-        void AppendBytes(uint8_t* data, int count);
+        void AppendBytes(uint8_t* data, std::size_t count);
     };
 }
 
