@@ -165,18 +165,14 @@ namespace Capt::Compression {
             }
             if (state.Raw[i] != 0) {
                 unsigned nextPos = i + state.Raw[i];
-                std::vector<uint8_t> rawData(line.data() + i, line.data() + i + state.Raw[i]);
-                assert(rawData.size() == state.Raw[i]);
-                encodedSize += cmd_WriteRaw(this->buffer, rawData.data(), rawData.size());
+                encodedSize += cmd_WriteRaw(this->buffer, line.data() + i, state.Raw[i]);
                 i = nextPos - 1;
                 continue;
             } else if (state.Copy[i] != 0) {
                 unsigned nextPos = i + state.Copy[i];
                 assert(nextPos < state.LineSize);
                 if (state.Raw[nextPos] != 0) {
-                    std::vector<uint8_t> rawData(line.data() + nextPos, line.data() + nextPos + state.Raw[nextPos]);
-                    assert(rawData.size() == state.Raw[nextPos]);
-                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], rawData.data(), rawData.size());
+                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], line.data() + nextPos, state.Raw[nextPos]);
                     nextPos += state.Raw[nextPos];
                 } else if (state.Repeat[nextPos] != 1) {
                     encodedSize += cmd_CopyThenRepeat(this->buffer, state.Copy[i], state.Repeat[nextPos], line[nextPos]);
@@ -189,9 +185,7 @@ namespace Capt::Compression {
             } else if (state.Repeat[i] != 1) {
                 unsigned nextPos = i + state.Repeat[i];
                 if (nextPos != state.LineSize && state.Raw[nextPos] != 0) {
-                    std::vector<uint8_t> rawData(line.data() + nextPos, line.data() + nextPos + state.Raw[nextPos]);
-                    assert(rawData.size() == state.Raw[nextPos]);
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], rawData.data(), rawData.size());
+                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], line.data() + nextPos, state.Raw[nextPos]);
                     nextPos += state.Raw[nextPos];
                 } else {
                     encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], nullptr, 0);
