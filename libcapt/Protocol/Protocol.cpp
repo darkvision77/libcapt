@@ -117,6 +117,24 @@ namespace Capt::Protocol {
         return err;
     }
 
+    // PCR_CLEANING (0xE0AD)
+    uint8_t Cleaning(std::iostream& stream) {
+        Capt::PacketBuilder builder(0xE0AD);
+        builder.AppendUint32(0xadeadbee);
+        builder.AppendUint16(1); // const byte
+        builder.AppendByte(0); // const byte
+        builder.AppendByte(0); // const byte
+        builder.Packet.WriteTo(stream);
+        stream.flush();
+
+        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        assert(packet.Opcode == builder.Packet.Opcode);
+        Capt::PacketReader reader = Capt::PacketReader(packet);
+        uint8_t err = reader.ReadByte();
+        // there is one more byte ignored by the original software
+        return err;
+    }
+
     static uint8_t execCmd(std::iostream& stream, uint16_t opcode) {
         Capt::CaptPacket(opcode).WriteTo(stream);
         stream.flush();

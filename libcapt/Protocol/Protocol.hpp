@@ -15,6 +15,7 @@ namespace Capt::Protocol {
     ExtendedStatus GetExtendedStatus(std::iostream& stream);
     BasicStatus GetBasicStatus(std::iostream& stream, uint8_t* changed = nullptr);
     uint8_t GoOnline(std::iostream& stream, uint16_t pageNumber);
+    uint8_t Cleaning(std::iostream& stream);
     uint8_t ReserveUnit(std::iostream& stream);
     uint8_t DiscardData(std::iostream& stream);
     uint8_t ClearError(std::iostream& stream);

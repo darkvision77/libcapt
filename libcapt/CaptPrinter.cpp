@@ -64,6 +64,11 @@ namespace Capt {
         return ex.IsOnline();
     }
 
+    void CaptPrinter::Cleaning() {
+        std::unique_lock lock(this->streamlock);
+        CHECK_RETCODE(Protocol::Cleaning(this->stream));
+    }
+
     bool CaptPrinter::WritePage(Protocol::PageParams params, std::streambuf& videoStream, std::size_t blockSize) {
         std::unique_lock lock(this->streamlock);
         Protocol::BeginPage(this->stream, params);

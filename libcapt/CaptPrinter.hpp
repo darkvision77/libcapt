@@ -36,6 +36,7 @@ namespace Capt {
         void ReserveUnit();
         void ClearError();
         bool GoOnline(unsigned page);
+        void Cleaning();
         bool WritePage(Protocol::PageParams params, std::streambuf& videoStream, std::size_t blockSize = 4096);
         void GoOffline();
         void ReleaseUnit();
