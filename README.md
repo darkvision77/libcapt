@@ -19,10 +19,17 @@ Currently, the target devices are printers with `CNTblModel = 0` (see Canon's dr
 | LBP1210 | EP-25         | 14                   | 600 dpi        | ~2002          |
 | LBP3200 | EP-26/EP-27   | 18                   | 600 dpi        | 2004-2006      |
 
-If you are looking for a driver for newer models, check out [mounaiban/captdriver](https://github.com/mounaiban/captdriver).
-
 ## Usage
-The [`examples`](examples) folder contains an example program for printing PBM files.
+Currently, there are no drivers that use libcapt.
+
+If you are tired of the original driver or want to seamlessly use
+your Canon LBP printer on other devices, you can use [UoWPrint](https://printserver.ink/).
+
+If you want to use an open source CUPS driver for the newer Canon LBP models,
+check out [mounaiban/captdriver](https://github.com/mounaiban/captdriver) (early alpha stage).
+
+Also, the [`examples`](examples) folder contains an example program for printing PBM files. \
+Keep in mind that this program does not implement all the features and is used only for printing testing.
 ```sh
 meson setup build -Dexamples=enabled
 meson compile -v -C build
