@@ -31,21 +31,20 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, const uint8_t* rawData, unsigned rawCount) {
-        if (copyCount == 0 && rawCount == 0) {
+    std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData) {
+        if (copyCount == 0 && rawData.size() == 0) {
             return 0;
         }
         std::size_t vsize = 0;
         if (copyCount <= 7) {
-            while (rawCount >= 8) {
-                unsigned count = std::min(rawCount, 255u);
-                vsize += ScoaCmd::CopyThenRawLong(buffer, copyCount, rawData, count);
+            while (rawData.size() >= 8) {
+                std::size_t count = std::min(rawData.size(), 255uz);
+                vsize += ScoaCmd::CopyThenRawLong(buffer, copyCount, rawData.subspan(0, count));
                 copyCount = 0;
-                rawData += count;
-                rawCount -= count;
+                rawData = rawData.subspan(count);
             }
-            if (copyCount != 0 || rawCount != 0) {
-                vsize += ScoaCmd::CopyThenRaw(buffer, copyCount, rawData, rawCount);
+            if (copyCount != 0 || rawData.size() != 0) {
+                vsize += ScoaCmd::CopyThenRaw(buffer, copyCount, rawData);
             }
         } else {
             while (copyCount >= 8) {
@@ -54,67 +53,64 @@ namespace Capt::Compression {
                 vsize += ScoaCmd::CopyLong(buffer, copy);
                 copyCount -= copy;
             }
-            return vsize + cmd_CopyThenRaw(buffer, copyCount, rawData, rawCount);
+            return vsize + cmd_CopyThenRaw(buffer, copyCount, rawData);
         }
         return vsize;
     }
 
-    std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, const uint8_t* rawData, unsigned rawCount) {
-        if (rawCount == 0) {
+    std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, std::span<const uint8_t> rawData) {
+        if (rawData.size() == 0) {
             return 0;
         }
         std::size_t vsize = 0;
-        if (rawCount <= 7) {
-            vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
+        if (rawData.size() <= 7) {
+            vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
         } else {
-            while (rawCount >= 8) {
-                unsigned count = std::min(rawCount, 255u);
-                vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData, count);
-                rawData += count;
-                rawCount -= count;
+            while (rawData.size() >= 8) {
+                std::size_t count = std::min(rawData.size(), 255uz);
+                vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData.subspan(0, count));
+                rawData = rawData.subspan(count);
             }
-            if (rawCount != 0) {
-                vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
+            if (rawData.size() != 0) {
+                vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
             }
         }
         return vsize;
     }
 
-    std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, const uint8_t* rawData, unsigned rawCount) {
-        if (repeatCount == 0 && rawCount == 0) {
+    std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
+        if (repeatCount == 0 && rawData.size() == 0) {
             return 0;
         }
         std::size_t vsize = 0;
         if (repeatCount <= 7) {
-            if (rawCount <= 7) {
-                if (rawCount == 0) {
+            if (rawData.size() <= 7) {
+                if (rawData.size() == 0) {
                     vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 } else if (repeatCount == 0) {
-                    vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
+                    vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
                 } else {
                     if (repeatCount >= 2) {
-                        vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData, rawCount);
+                        vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData);
                     } else {
                         vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
-                        vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
+                        vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
                     }
                 }
             } else {
                 if (repeatCount >= 2) {
-                    vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData, 7);
-                    rawData += 7;
-                    rawCount -= 7;
+                    vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData.subspan(0, 7));
+                    rawData = rawData.subspan(7);
                 } else if (repeatCount != 0) {
                     vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 }
-                while (rawCount >= 8) {
-                    unsigned count = std::min(rawCount, 255u);
-                    vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData, count);
-                    rawData += count;
-                    rawCount -= count;
+                while (rawData.size() >= 8) {
+                    std::size_t count = std::min(rawData.size(), 255ul);
+                    vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData.subspan(0, count));
+                    rawData = rawData.subspan(count);
                 }
-                if (rawCount != 0) {
-                    vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData, rawCount);
+                if (rawData.size() != 0) {
+                    vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
                 }
             }
         } else {
@@ -123,7 +119,7 @@ namespace Capt::Compression {
                 vsize += ScoaCmd::CopyThenRepeatLong(buffer, 0, count, repeatByte);
                 repeatCount -= count;
             }
-            return vsize + cmd_RepeatThenRaw(buffer, repeatCount, repeatByte, rawData, rawCount);
+            return vsize + cmd_RepeatThenRaw(buffer, repeatCount, repeatByte, rawData);
         }
         return vsize;
     }
@@ -165,14 +161,14 @@ namespace Capt::Compression {
             }
             if (state.Raw[i] != 0) {
                 unsigned nextPos = i + state.Raw[i];
-                encodedSize += cmd_WriteRaw(this->buffer, line.data() + i, state.Raw[i]);
+                encodedSize += cmd_WriteRaw(this->buffer, {line.data() + i, state.Raw[i]});
                 i = nextPos - 1;
                 continue;
             } else if (state.Copy[i] != 0) {
                 unsigned nextPos = i + state.Copy[i];
                 assert(nextPos < state.LineSize);
                 if (state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], line.data() + nextPos, state.Raw[nextPos]);
+                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], {line.data() + nextPos, state.Raw[nextPos]});
                     nextPos += state.Raw[nextPos];
                 } else if (state.Repeat[nextPos] != 1) {
                     encodedSize += cmd_CopyThenRepeat(this->buffer, state.Copy[i], state.Repeat[nextPos], line[nextPos]);
@@ -185,10 +181,10 @@ namespace Capt::Compression {
             } else if (state.Repeat[i] != 1) {
                 unsigned nextPos = i + state.Repeat[i];
                 if (nextPos != state.LineSize && state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], line.data() + nextPos, state.Raw[nextPos]);
+                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], {line.data() + nextPos, state.Raw[nextPos]});
                     nextPos += state.Raw[nextPos];
                 } else {
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], nullptr, 0);
+                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], {});
                 }
                 i = nextPos - 1;
                 continue;

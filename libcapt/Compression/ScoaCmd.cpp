@@ -14,12 +14,12 @@ namespace Capt::Compression::ScoaCmd {
         return 2;
     }
 
-    std::size_t CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, const uint8_t* rawData, unsigned rawCount) {
+    std::size_t CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData) {
         assert(copyCount >= 0 && copyCount <= 7);
-        assert(rawCount >= 1 && rawCount <= 7);
-        buffer.push_back(((rawCount & 0x07) << 3) | (copyCount & 0x07));
-        buffer.insert(buffer.end(), rawData, rawData + rawCount);
-        return 1 + rawCount;
+        assert(rawData.size() >= 1 && rawData.size() <= 7);
+        buffer.push_back(((rawData.size() & 0x07) << 3) | (copyCount & 0x07));
+        buffer.insert(buffer.end(), rawData.begin(), rawData.end());
+        return 1 + rawData.size();
     }
 
     std::size_t Extend(std::vector<uint8_t>& buffer, unsigned count) {
@@ -46,27 +46,27 @@ namespace Capt::Compression::ScoaCmd {
         return vsize + 2;
     }
 
-    std::size_t RepeatThenRawLong(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, const uint8_t* rawData, unsigned rawCount) {
-        assert(rawCount >= 8);
-        assert(rawCount <= 255);
+    std::size_t RepeatThenRawLong(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
+        assert(rawData.size() >= 8);
+        assert(rawData.size() <= 255);
         assert(repeatCount >= 2);
         assert(repeatCount <= 7);
-        std::size_t vsize = Extend(buffer, rawCount);
-        buffer.push_back(0x40 | ((repeatCount & 0x07) << 3) | (rawCount & 0x07));
+        std::size_t vsize = Extend(buffer, rawData.size());
+        buffer.push_back(0x40 | ((repeatCount & 0x07) << 3) | (rawData.size() & 0x07));
         buffer.push_back(repeatByte);
-        buffer.insert(buffer.end(), rawData, rawData + rawCount);
-        return vsize + 2 + rawCount;
+        buffer.insert(buffer.end(), rawData.begin(), rawData.end());
+        return vsize + 2 + rawData.size();
     }
 
-    std::size_t CopyThenRawLong(std::vector<uint8_t>& buffer, unsigned copyCount, const uint8_t* rawData, unsigned rawCount) {
-        assert(rawCount >= 8);
-        assert(rawCount <= 255);
+    std::size_t CopyThenRawLong(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData) {
+        assert(rawData.size() >= 8);
+        assert(rawData.size() <= 255);
         assert(copyCount >= 0);
         assert(copyCount <= 7);
-        std::size_t vsize = Extend(buffer, rawCount);
-        buffer.push_back(0xc0 | (rawCount & 0x07) << 3 | (copyCount & 0x07));
-        buffer.insert(buffer.end(), rawData, rawData + rawCount);
-        return vsize + 1 + rawCount;
+        std::size_t vsize = Extend(buffer, rawData.size());
+        buffer.push_back(0xc0 | (rawData.size() & 0x07) << 3 | (copyCount & 0x07));
+        buffer.insert(buffer.end(), rawData.begin(), rawData.end());
+        return vsize + 1 + rawData.size();
     }
 
     std::size_t CopyLong(std::vector<uint8_t>& buffer, unsigned copyCount) {
@@ -106,15 +106,15 @@ namespace Capt::Compression::ScoaCmd {
         return 1;
     }
 
-    std::size_t RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, const uint8_t* rawData, unsigned rawCount) {
-        assert(rawCount != 0 && repeatCount != 0);
+    std::size_t RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
+        assert(rawData.size() != 0 && repeatCount != 0);
         assert(repeatCount >= 2);
         assert(repeatCount <= 7);
-        assert(rawCount >= 1);
-        assert(rawCount <= 7);
-        buffer.push_back(0xc0 | ((repeatCount & 0x07) << 3) | (rawCount & 0x07));
+        assert(rawData.size() >= 1);
+        assert(rawData.size() <= 7);
+        buffer.push_back(0xc0 | ((repeatCount & 0x07) << 3) | (rawData.size() & 0x07));
         buffer.push_back(repeatByte);
-        buffer.insert(buffer.end(), rawData, rawData + rawCount);
-        return 2 + rawCount;
+        buffer.insert(buffer.end(), rawData.begin(), rawData.end());
+        return 2 + rawData.size();
     }
 }
