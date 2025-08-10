@@ -72,10 +72,9 @@ int main(int argc, char* argv[]) {
 
     Compression::ScoaStreambuf scoaStreambuf(*pbmStream.rdbuf(), lineSize, lines);
 
-    Protocol::PageParams pp {
-        .ImageLineSize = static_cast<uint16_t>(lineSize),
-        .ImageLines = static_cast<uint16_t>(lines),
-    };
+    Protocol::PageParams pp;
+    pp.ImageLineSize = static_cast<uint16_t>(lineSize);
+    pp.ImageLines = static_cast<uint16_t>(lines);
     std::println(stderr, "LineSize = {}", pp.ImageLineSize);
     std::println(stderr, "Lines = {}", pp.ImageLines);
 
