@@ -18,13 +18,13 @@ protected:
         ASSERT_EQ(this->buffer.Buffer().size(), 4);
     }
 
-    void WritePayload(uint16_t opcode, std::vector<uint8_t> payload) {
+    void WritePayload(uint16_t opcode, const std::vector<uint8_t>& payload) {
         this->packet = CaptPacket(opcode, payload);
         this->packet.WriteTo(this->buffer);
         ASSERT_EQ(this->buffer.Buffer().size(), 4 + payload.size());
     }
 
-    void Read(std::vector<uint8_t> data) {
+    void Read(const std::vector<uint8_t>& data) {
         this->buffer = MemoryStream(data);
         this->packet = CaptPacket::ReadFrom(this->buffer);
         ASSERT_EQ(this->packet.Size(), data.size());

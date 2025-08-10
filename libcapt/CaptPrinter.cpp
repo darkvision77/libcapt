@@ -10,7 +10,7 @@
 
 namespace Capt {
     #define CHECK_RETCODE(EXP) checkRetcode(EXP, #EXP)
-    static inline void checkRetcode(uint8_t cmdResult, std::string paramName) {
+    static inline void checkRetcode(uint8_t cmdResult, std::string_view paramName) {
         if (cmdResult != 0) {
             throw CaptPrinterError(std::format("Critical protocol error: {} returned non-successfull code (0x{:02X})", paramName, cmdResult));
         }
@@ -69,7 +69,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::Cleaning(this->stream));
     }
 
-    bool CaptPrinter::WritePage(Protocol::PageParams params, std::streambuf& videoStream, std::size_t blockSize) {
+    bool CaptPrinter::WritePage(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
         std::unique_lock lock(this->streamlock);
         Protocol::BeginPage(this->stream, params);
         Protocol::BeginData(this->stream);

@@ -7,7 +7,7 @@
 namespace Capt::Compression {
     #define CLOG(...) if (this->commandLog) *this->commandLog << std::format(__VA_ARGS__) << std::flush
     #define CHECK_BOUNDS(PARAM, MIN, MAX) checkBounds(PARAM, MIN, MAX, #PARAM)
-    inline static void checkBounds(int value, int min, int max, std::string paramName) {
+    inline static void checkBounds(int value, int min, int max, std::string_view paramName) {
         if (value < min || value > max) {
             throw DecoderError(std::format("{} must be in range [{};{}], got {}", paramName, min, max, value));
         }
