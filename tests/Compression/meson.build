@@ -30,6 +30,8 @@ pbmfiles = files(
     'data/randE.pbm',
     'data/randF.pbm',
     'data/empty.pbm',
+    'data/black-1.pbm',
+    'data/repx-1.pbm',
 )
 
 foreach file : pdffiles
