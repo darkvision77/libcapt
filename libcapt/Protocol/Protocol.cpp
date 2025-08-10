@@ -3,10 +3,18 @@
 #include "Enums.hpp"
 #include "ExtendedStatus.hpp"
 #include "Core/PacketReader.hpp"
-#include <cassert>
+#include "ProtocolError.hpp"
 #include <cstdint>
+#include <expected>
+#include <format>
 
 namespace Capt::Protocol {
+    static constexpr void checkOpcode(uint16_t actual, uint16_t expected) {
+        if (actual != expected) {
+            throw ProtocolError(std::format("unexpected response opcode: 0x{:04X} (expected 0x{:04X})", actual, expected));
+        }
+    }
+
     void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params) {
         Capt::PacketBuilder builder(0xD0A0);
         builder.AppendUint16(0); // const uint16
@@ -56,16 +64,19 @@ namespace Capt::Protocol {
         stream.flush();
     }
 
-    ExtendedStatus PC_GET_EXTENDED_STATUS(std::iostream& stream) {
+    std::expected<ExtendedStatus, BasicStatus> PC_GET_EXTENDED_STATUS(std::iostream& stream) {
         Capt::CaptPacket(0xA0A0).WriteTo(stream);
         stream.flush();
 
         Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        checkOpcode(packet.Opcode, 0xA0A0);
         Capt::PacketReader reader = Capt::PacketReader(packet);
 
         ExtendedStatus result;
         result.Basic = static_cast<BasicStatus>(reader.ReadByte());
-        assert((result.Basic & BasicStatus::ERROR_BIT) == 0);
+        if ((result.Basic & BasicStatus::ERROR_BIT) != 0) {
+            return std::unexpected(result.Basic);
+        }
         reader.ReadByte(); // param_1 + 0x279
         result.Aux = static_cast<AuxStatus>(reader.ReadByte());
         result.Controller = static_cast<ControllerStatus>(reader.ReadByte());
@@ -84,7 +95,7 @@ namespace Capt::Protocol {
         stream.flush();
 
         Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
-        assert(packet.Opcode == 0xE0A0);
+        checkOpcode(packet.Opcode, 0xE0A0);
         Capt::PacketReader reader = Capt::PacketReader(packet);
         BasicStatus status = static_cast<BasicStatus>(reader.ReadByte());
         uint8_t ch = reader.ReadByte();
@@ -104,7 +115,7 @@ namespace Capt::Protocol {
         stream.flush();
 
         Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
-        assert(packet.Opcode == builder.Packet.Opcode);
+        checkOpcode(packet.Opcode, builder.Packet.Opcode);
         Capt::PacketReader reader = Capt::PacketReader(packet);
         uint8_t err = reader.ReadByte();
         return err;
@@ -120,7 +131,7 @@ namespace Capt::Protocol {
         stream.flush();
 
         Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
-        assert(packet.Opcode == builder.Packet.Opcode);
+        checkOpcode(packet.Opcode, builder.Packet.Opcode);
         Capt::PacketReader reader = Capt::PacketReader(packet);
         uint8_t err = reader.ReadByte();
         // there is one more byte ignored by the original software
@@ -132,7 +143,7 @@ namespace Capt::Protocol {
         stream.flush();
 
         Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
-        assert(packet.Opcode == opcode);
+        checkOpcode(packet.Opcode, opcode);
         Capt::PacketReader reader = Capt::PacketReader(packet);
         uint8_t err = reader.ReadByte();
         return err;

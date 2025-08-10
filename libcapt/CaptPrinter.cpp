@@ -1,5 +1,5 @@
 #include "CaptPrinter.hpp"
-#include "CaptPrinterError.hpp"
+#include "UnexpectedBehaviourError.hpp"
 #include "Protocol/Enums.hpp"
 #include "Protocol/ExtendedStatus.hpp"
 #include "Protocol/PageParams.hpp"
@@ -12,16 +12,19 @@ namespace Capt {
     #define CHECK_RETCODE(EXP) checkRetcode(EXP, #EXP)
     static inline void checkRetcode(uint8_t cmdResult, std::string_view paramName) {
         if (cmdResult != 0) {
-            throw CaptPrinterError(std::format("Critical protocol error: {} returned non-successfull code (0x{:02X})", paramName, cmdResult));
+            throw UnexpectedBehaviourError(std::format("{} returned non-successfull code (0x{:02X})", paramName, cmdResult));
         }
     }
 
     CaptPrinter::CaptPrinter(std::iostream& stream) : stream(stream), status(Protocol::ExtendedStatus()) {}
 
     Protocol::ExtendedStatus CaptPrinter::updateStatus() {
-        Protocol::ExtendedStatus ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
-        this->status.store(ex);
-        return ex;
+        auto ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
+        if (!ex) {
+            throw UnexpectedBehaviourError(std::format("PC_GET_EXTENDED_STATUS error (0x{:02X})", static_cast<uint8_t>(ex.error())));
+        }
+        this->status.store(*ex);
+        return *ex;
     }
 
     Protocol::ExtendedStatus CaptPrinter::GetStatus() {
@@ -37,7 +40,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PC_RESERVE_UNIT(this->stream));
         Protocol::ExtendedStatus ex = this->updateStatus();
         if (!ex.UnitReserved()) {
-            throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to reserve unit)");
+            throw UnexpectedBehaviourError("failed to reserve unit");
         }
     }
 
@@ -99,7 +102,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PCR_GO_OFFLINE(this->stream));
         Protocol::ExtendedStatus ex = this->updateStatus();
         if (ex.IsOnline()) {
-            throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to go offline)");
+            throw UnexpectedBehaviourError("failed to offline");
         }
     }
 
@@ -112,7 +115,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PCR_RELEASE_UNIT(this->stream));
         ex = this->updateStatus();
         if (ex.UnitReserved()) {
-            throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to reserve unit)");
+            throw UnexpectedBehaviourError("failed to reserve unit");
         }
     }
 
