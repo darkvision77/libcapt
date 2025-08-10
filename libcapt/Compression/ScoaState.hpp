@@ -2,11 +2,11 @@
 #define _LIBCAPT_COMPRESSION_SCOA_STATE_HPP_
 
 #include <cstdint>
+#include <span>
 #include <vector>
 
 namespace Capt::Compression {
-    class ScoaState {
-    public:
+    struct ScoaState {
         unsigned LineSize;
         std::vector<uint8_t> PrevLine;
 
@@ -16,7 +16,7 @@ namespace Capt::Compression {
 
         explicit ScoaState(unsigned lineSize);
 
-        void ProcessLine(const std::vector<uint8_t>& line);
+        void ProcessLine(std::span<const uint8_t> line);
     };
 }
 

@@ -1,13 +1,15 @@
 #include "ScoaStreambuf.hpp"
+#include "ScoaState.hpp"
 #include "ScoaCmd.hpp"
 #include <cassert>
+#include <ios>
 #include <iostream>
 
 namespace Capt::Compression {
     using int_type = ScoaStreambuf::int_type;
 
     ScoaStreambuf::ScoaStreambuf(std::streambuf& rasterStream, unsigned lineSize, unsigned lines)
-        : rasterStream(&rasterStream), state(lineSize), linesRemain(lines), videoSize(0) {
+        : rasterStream(&rasterStream), state(lineSize), lineBuffer(lineSize), linesRemain(lines), videoSize(0) {
         char_type* start = reinterpret_cast<char_type*>(this->buffer.data());
         char_type* end = start + this->buffer.size();
         this->setg(start, end, end);
@@ -151,24 +153,23 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t ScoaStreambuf::encodeLine(const std::vector<uint8_t>& line) {
+    std::size_t ScoaStreambuf::encodeLine(std::span<const uint8_t> line) {
         std::size_t encodedSize = 0;
         assert(line.size() == state.LineSize);
-        for (unsigned i = 0; i < state.LineSize; i++) {
+        for (unsigned i = 0; i < state.LineSize;) {
             if (state.Copy[i] == state.LineSize - i) {
                 encodedSize += ScoaCmd::EOL(this->buffer);
                 break;
             }
+            unsigned nextPos = i;
             if (state.Raw[i] != 0) {
-                unsigned nextPos = i + state.Raw[i];
-                encodedSize += cmd_WriteRaw(this->buffer, {line.data() + i, state.Raw[i]});
-                i = nextPos - 1;
-                continue;
+                encodedSize += cmd_WriteRaw(this->buffer, line.subspan(i, state.Raw[i]));
+                nextPos += state.Raw[i];
             } else if (state.Copy[i] != 0) {
-                unsigned nextPos = i + state.Copy[i];
+                nextPos += state.Copy[i];
                 assert(nextPos < state.LineSize);
                 if (state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], {line.data() + nextPos, state.Raw[nextPos]});
+                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], line.subspan(nextPos, state.Raw[nextPos]));
                     nextPos += state.Raw[nextPos];
                 } else if (state.Repeat[nextPos] != 1) {
                     encodedSize += cmd_CopyThenRepeat(this->buffer, state.Copy[i], state.Repeat[nextPos], line[nextPos]);
@@ -176,20 +177,17 @@ namespace Capt::Compression {
                 } else {
                     encodedSize += cmd_Copy(this->buffer, state.Copy[i]);
                 }
-                i = nextPos - 1;
-                continue;
             } else if (state.Repeat[i] != 1) {
-                unsigned nextPos = i + state.Repeat[i];
+                nextPos += state.Repeat[i];
                 if (nextPos != state.LineSize && state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], {line.data() + nextPos, state.Raw[nextPos]});
+                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], line.subspan(nextPos, state.Raw[nextPos]));
                     nextPos += state.Raw[nextPos];
                 } else {
                     encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], {});
                 }
-                i = nextPos - 1;
-                continue;
             }
-            assert(false);
+            assert(i != nextPos);
+            i = nextPos;
         }
         return encodedSize;
     }
@@ -202,14 +200,17 @@ namespace Capt::Compression {
             return traits_type::eof();
         }
 
-        std::vector<uint8_t> lineBuffer(this->state.LineSize);
-        if (this->rasterStream->sgetn(reinterpret_cast<char*>(lineBuffer.data()), lineBuffer.size()) == 0) {
+        std::streamsize read = this->rasterStream->sgetn(reinterpret_cast<char*>(this->lineBuffer.data()), this->lineBuffer.size());
+        if (read <= 0) {
             return traits_type::eof();
         }
+        assert(static_cast<std::size_t>(read) == this->lineBuffer.size());
 
         this->buffer.clear();
-        this->state.ProcessLine(lineBuffer);
-        this->videoSize += this->encodeLine(lineBuffer);
+        this->state.ProcessLine(this->lineBuffer);
+        this->videoSize += this->encodeLine(this->lineBuffer);
+        this->state.PrevLine.resize(this->lineBuffer.size());
+        this->state.PrevLine.swap(this->lineBuffer);
 
         this->linesRemain--;
         if (this->linesRemain == 0) {

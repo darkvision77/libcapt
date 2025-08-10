@@ -11,10 +11,11 @@ namespace Capt::Compression {
         std::streambuf* rasterStream;
         ScoaState state;
         std::vector<uint8_t> buffer;
+        std::vector<uint8_t> lineBuffer;
         unsigned linesRemain;
         std::size_t videoSize;
 
-        std::size_t encodeLine(const std::vector<uint8_t>& line);
+        std::size_t encodeLine(std::span<const uint8_t> line);
 
     protected:
         int_type underflow() override;

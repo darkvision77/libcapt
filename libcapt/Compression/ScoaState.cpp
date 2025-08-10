@@ -1,11 +1,12 @@
 #include "ScoaState.hpp"
+#include <span>
 #include <stdexcept>
 
 namespace Capt::Compression {
     ScoaState::ScoaState(unsigned lineSize)
         : LineSize(lineSize), Copy(lineSize), Repeat(lineSize), Raw(lineSize) {}
 
-    void ScoaState::ProcessLine(const std::vector<uint8_t>& line) {
+    void ScoaState::ProcessLine(std::span<const uint8_t> line) {
         if (line.size() != this->LineSize) {
             throw std::invalid_argument("line size mismatch");
         }
@@ -38,6 +39,5 @@ namespace Capt::Compression {
             }
             this->Raw[i] = rawCount;
         }
-        this->PrevLine = line;
     }
 }
