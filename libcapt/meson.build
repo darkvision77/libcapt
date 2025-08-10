@@ -38,7 +38,7 @@ install_headers(headers, preserve_path: true, subdir: 'libcapt')
 
 atomic_dep = dependency('atomic')
 
-libcapt = both_libraries(
+libcapt = library(
     'libcapt',
     sources,
     dependencies: [atomic_dep],
