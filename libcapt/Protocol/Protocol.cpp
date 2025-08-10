@@ -1,4 +1,5 @@
 #include "Protocol.hpp"
+#include "Core/CaptPacket.hpp"
 #include "Core/PacketBuilder.hpp"
 #include "Enums.hpp"
 #include "ExtendedStatus.hpp"
@@ -16,7 +17,7 @@ namespace Capt::Protocol {
     }
 
     void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params) {
-        Capt::PacketBuilder builder(0xD0A0);
+        PacketBuilder builder(0xD0A0);
         builder.AppendUint16(0); // const uint16
         builder.AppendUint16(0x03fc); // TargetModel
         builder.AppendByte(params.PaperSize);
@@ -43,34 +44,28 @@ namespace Capt::Protocol {
         builder.AppendUint16(params.ImageLines);
         builder.AppendUint16(params.PaperWidth);
         builder.AppendUint16(params.PaperHeight);
-        builder.Packet.WriteTo(stream);
-        stream.flush();
+        stream << builder.Packet << std::flush;
     }
 
     void IC_BEGIN_DATA(std::ostream& stream) {
-        Capt::CaptPacket(0xD0A1).WriteTo(stream);
-        stream.flush();
+        CaptPacket::WriteTo(stream, 0xD0A1) << std::flush;
     }
 
     void IC_END_PAGE(std::ostream& stream) {
-        Capt::CaptPacket(0xD0A2).WriteTo(stream);
-        stream.flush();
+        CaptPacket::WriteTo(stream, 0xD0A2) << std::flush;
     }
 
-    void IC_VIDEO_DATA(std::ostream& stream, uint8_t* data, std::size_t count) {
-        // TODO: optimize?
-        Capt::CaptPacket packet(0xC0A0, std::vector<uint8_t>(data, data + count));
-        packet.WriteTo(stream);
-        stream.flush();
+    void IC_VIDEO_DATA(std::ostream& stream, std::span<const uint8_t> data) {
+        CaptPacket::WriteTo(stream, 0xC0A0, data) << std::flush;
     }
 
     std::expected<ExtendedStatus, BasicStatus> PC_GET_EXTENDED_STATUS(std::iostream& stream) {
-        Capt::CaptPacket(0xA0A0).WriteTo(stream);
-        stream.flush();
+        CaptPacket::WriteTo(stream, 0xA0A0) << std::flush;
 
-        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        CaptPacket packet;
+        stream >> packet;
         checkOpcode(packet.Opcode, 0xA0A0);
-        Capt::PacketReader reader = Capt::PacketReader(packet);
+        PacketReader reader = PacketReader(packet);
 
         ExtendedStatus result;
         result.Basic = static_cast<BasicStatus>(reader.ReadByte());
@@ -91,12 +86,12 @@ namespace Capt::Protocol {
     }
 
     BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed) {
-        Capt::CaptPacket(0xE0A0).WriteTo(stream);
-        stream.flush();
+        CaptPacket::WriteTo(stream, 0xE0A0) << std::flush;
 
-        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        CaptPacket packet;
+        stream >> packet;
         checkOpcode(packet.Opcode, 0xE0A0);
-        Capt::PacketReader reader = Capt::PacketReader(packet);
+        PacketReader reader = PacketReader(packet);
         BasicStatus status = static_cast<BasicStatus>(reader.ReadByte());
         uint8_t ch = reader.ReadByte();
         if (changed != nullptr) {
@@ -106,45 +101,45 @@ namespace Capt::Protocol {
     }
 
     uint8_t PCR_GO_ONLINE(std::iostream& stream, uint16_t pageNumber) {
-        Capt::PacketBuilder builder(0xE0A5);
+        PacketBuilder builder(0xE0A5);
         builder.AppendUint32(0xadeadbee);
         builder.AppendUint16(pageNumber);
         builder.AppendByte(0); // const byte
         builder.AppendByte(0); // const byte
-        builder.Packet.WriteTo(stream);
-        stream.flush();
+        stream << builder.Packet << std::flush;
 
-        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        CaptPacket packet;
+        stream >> packet;
         checkOpcode(packet.Opcode, builder.Packet.Opcode);
-        Capt::PacketReader reader = Capt::PacketReader(packet);
+        PacketReader reader = PacketReader(packet);
         uint8_t err = reader.ReadByte();
         return err;
     }
 
     uint8_t PCR_CLEANING(std::iostream& stream) {
-        Capt::PacketBuilder builder(0xE0AD);
+        PacketBuilder builder(0xE0AD);
         builder.AppendUint32(0xadeadbee);
         builder.AppendUint16(1); // const byte
         builder.AppendByte(0); // const byte
         builder.AppendByte(0); // const byte
-        builder.Packet.WriteTo(stream);
-        stream.flush();
+        stream << builder.Packet << std::flush;
 
-        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        CaptPacket packet;
+        stream >> packet;
         checkOpcode(packet.Opcode, builder.Packet.Opcode);
-        Capt::PacketReader reader = Capt::PacketReader(packet);
+        PacketReader reader = PacketReader(packet);
         uint8_t err = reader.ReadByte();
         // there is one more byte ignored by the original software
         return err;
     }
 
     static uint8_t execCmd(std::iostream& stream, uint16_t opcode) {
-        Capt::CaptPacket(opcode).WriteTo(stream);
-        stream.flush();
+        CaptPacket::WriteTo(stream, opcode) << std::flush;
 
-        Capt::CaptPacket packet = Capt::CaptPacket::ReadFrom(stream);
+        CaptPacket packet;
+        stream >> packet;
         checkOpcode(packet.Opcode, opcode);
-        Capt::PacketReader reader = Capt::PacketReader(packet);
+        PacketReader reader = PacketReader(packet);
         uint8_t err = reader.ReadByte();
         return err;
     }

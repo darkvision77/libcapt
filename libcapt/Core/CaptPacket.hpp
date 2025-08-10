@@ -3,8 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <istream>
-#include <ostream>
+#include <iostream>
+#include <span>
 #include <vector>
 
 namespace Capt {
@@ -15,15 +15,17 @@ namespace Capt {
 
         explicit CaptPacket() noexcept;
         explicit CaptPacket(uint16_t opcode) noexcept;
-        explicit CaptPacket(uint16_t opcode, std::vector<uint8_t> payload) noexcept;
+        explicit CaptPacket(uint16_t opcode, const std::vector<uint8_t>& payload) noexcept;
 
         inline std::size_t Size() const noexcept {
             return this->Payload.size() + 4;
         }
 
-        std::size_t WriteTo(std::ostream& stream);
-        static CaptPacket ReadFrom(std::istream& stream);
+        static std::ostream& WriteTo(std::ostream& stream, uint16_t opcode, std::span<const uint8_t> payload = {});
     };
+
+    std::ostream& operator<<(std::ostream& stream, const CaptPacket& packet);
+    std::istream& operator>>(std::istream& stream, CaptPacket& packet);
 }
 
 #endif

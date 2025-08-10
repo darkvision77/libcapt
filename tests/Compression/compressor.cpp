@@ -82,13 +82,13 @@ int main(int argc, char* argv[]) {
     Protocol::IC_BEGIN_PAGE(outStream, pp);
     Protocol::IC_BEGIN_DATA(outStream);
     const std::size_t maxsize = 4096;
+    std::vector<uint8_t> buffer(maxsize);
     while (true) {
-        std::vector<uint8_t> buffer(maxsize);
         std::streamsize read = scoaStreambuf.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
-        if (read == 0) {
+        if (read <= 0) {
             break;
         }
-        Protocol::IC_VIDEO_DATA(outStream, buffer.data(), read);
+        Protocol::IC_VIDEO_DATA(outStream, {buffer.data(), static_cast<std::size_t>(read)});
     }
     Protocol::IC_END_PAGE(outStream);
     return 0;

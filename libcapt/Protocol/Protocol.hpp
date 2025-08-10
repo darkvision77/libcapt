@@ -7,12 +7,13 @@
 #include <expected>
 #include <iostream>
 #include <cstdint>
+#include <span>
 
 namespace Capt::Protocol {
     void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params);
     void IC_BEGIN_DATA(std::ostream& stream);
     void IC_END_PAGE(std::ostream& stream);
-    void IC_VIDEO_DATA(std::ostream& stream, uint8_t* data, std::size_t count);
+    void IC_VIDEO_DATA(std::ostream& stream, std::span<const uint8_t> data);
     std::expected<ExtendedStatus, BasicStatus> PC_GET_EXTENDED_STATUS(std::iostream& stream);
     BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed = nullptr);
     uint8_t PCR_GO_ONLINE(std::iostream& stream, uint16_t pageNumber);

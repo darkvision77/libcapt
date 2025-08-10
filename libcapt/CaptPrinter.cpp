@@ -79,7 +79,7 @@ namespace Capt {
         while (true) {
             std::vector<uint8_t> buffer(blockSize);
             std::streamsize read = videoStream.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
-            if (read == 0) {
+            if (read <= 0) {
                 break;
             }
             while (true) {
@@ -91,7 +91,7 @@ namespace Capt {
                     break;
                 }
             }
-            Protocol::IC_VIDEO_DATA(this->stream, buffer.data(), read);
+            Protocol::IC_VIDEO_DATA(this->stream, {buffer.data(), static_cast<std::size_t>(read)});
         }
         Protocol::IC_END_PAGE(this->stream);
         return true;

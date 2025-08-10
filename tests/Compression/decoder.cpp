@@ -27,7 +27,8 @@ protected:
         }
 
         while (true) {
-            CaptPacket packet = CaptPacket::ReadFrom(this->reader);
+            CaptPacket packet;
+            this->reader >> packet;
             if (packet.Opcode == 0xD0A0) {
                 this->LineSize = (static_cast<unsigned>(packet.Payload[31-4]) << 8) | static_cast<unsigned>(packet.Payload[30-4]);
                 this->LinesCount = (static_cast<unsigned>(packet.Payload[33-4]) << 8) | static_cast<unsigned>(packet.Payload[32-4]);

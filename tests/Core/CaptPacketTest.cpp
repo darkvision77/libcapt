@@ -14,19 +14,19 @@ protected:
 
     void WriteOpcode(uint16_t opcode) {
         this->packet = CaptPacket(opcode);
-        this->packet.WriteTo(this->buffer);
+        this->buffer << this->packet;
         ASSERT_EQ(this->buffer.Buffer().size(), 4);
     }
 
     void WritePayload(uint16_t opcode, const std::vector<uint8_t>& payload) {
         this->packet = CaptPacket(opcode, payload);
-        this->packet.WriteTo(this->buffer);
+        this->buffer << this->packet;
         ASSERT_EQ(this->buffer.Buffer().size(), 4 + payload.size());
     }
 
     void Read(const std::vector<uint8_t>& data) {
         this->buffer = MemoryStream(data);
-        this->packet = CaptPacket::ReadFrom(this->buffer);
+        this->buffer >> this->packet;
         ASSERT_EQ(this->packet.Size(), data.size());
         ASSERT_EQ(this->packet.Payload.size(), data.size() - 4);
     }
