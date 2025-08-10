@@ -30,7 +30,7 @@ headers = files(
     'Protocol/Protocol.hpp',
 
     'CaptPrinter.hpp',
-    'CaptPrinterError.hpp',
+    'UnexpectedBehaviourError.hpp',
 )
 
 include = include_directories('.')
