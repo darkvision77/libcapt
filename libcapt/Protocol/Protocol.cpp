@@ -7,8 +7,7 @@
 #include <cstdint>
 
 namespace Capt::Protocol {
-    // IC_BEGIN_PAGE (0xD0A0)
-    void BeginPage(std::ostream& stream, const PageParams& params) {
+    void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params) {
         Capt::PacketBuilder builder(0xD0A0);
         builder.AppendUint16(0); // const uint16
         builder.AppendUint16(0x03fc); // TargetModel
@@ -40,28 +39,24 @@ namespace Capt::Protocol {
         stream.flush();
     }
 
-    // IC_BEGIN_DATA (0xD0A1)
-    void BeginData(std::ostream& stream) {
+    void IC_BEGIN_DATA(std::ostream& stream) {
         Capt::CaptPacket(0xD0A1).WriteTo(stream);
         stream.flush();
     }
 
-    // IC_END_PAGE (0xD0A2)
-    void EndPage(std::ostream& stream) {
+    void IC_END_PAGE(std::ostream& stream) {
         Capt::CaptPacket(0xD0A2).WriteTo(stream);
         stream.flush();
     }
 
-    // IC_VIDEO_DATA (0xC0A0)
-    void VideoData(std::ostream& stream, uint8_t* data, std::size_t count) {
+    void IC_VIDEO_DATA(std::ostream& stream, uint8_t* data, std::size_t count) {
         // TODO: optimize?
         Capt::CaptPacket packet(0xC0A0, std::vector<uint8_t>(data, data + count));
         packet.WriteTo(stream);
         stream.flush();
     }
 
-    // PC_GET_EXTENDED_STATUS (0xA0A0)
-    ExtendedStatus GetExtendedStatus(std::iostream& stream) {
+    ExtendedStatus PC_GET_EXTENDED_STATUS(std::iostream& stream) {
         Capt::CaptPacket(0xA0A0).WriteTo(stream);
         stream.flush();
 
@@ -84,8 +79,7 @@ namespace Capt::Protocol {
         return result;
     }
 
-    // PCR_GET_BASIC_STATUS (0xE0A0)
-    BasicStatus GetBasicStatus(std::iostream& stream, uint8_t* changed) {
+    BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed) {
         Capt::CaptPacket(0xE0A0).WriteTo(stream);
         stream.flush();
 
@@ -100,8 +94,7 @@ namespace Capt::Protocol {
         return status;
     }
 
-    // PCR_GO_ONLINE (0xE0A5)
-    uint8_t GoOnline(std::iostream& stream, uint16_t pageNumber) {
+    uint8_t PCR_GO_ONLINE(std::iostream& stream, uint16_t pageNumber) {
         Capt::PacketBuilder builder(0xE0A5);
         builder.AppendUint32(0xadeadbee);
         builder.AppendUint16(pageNumber);
@@ -117,8 +110,7 @@ namespace Capt::Protocol {
         return err;
     }
 
-    // PCR_CLEANING (0xE0AD)
-    uint8_t Cleaning(std::iostream& stream) {
+    uint8_t PCR_CLEANING(std::iostream& stream) {
         Capt::PacketBuilder builder(0xE0AD);
         builder.AppendUint32(0xadeadbee);
         builder.AppendUint16(1); // const byte
@@ -146,24 +138,11 @@ namespace Capt::Protocol {
         return err;
     }
 
-    // PC_RESERVE_UNIT (0xA2A0)
-    uint8_t ReserveUnit(std::iostream& stream) { return execCmd(stream, 0xA2A0); }
-
-    // PCR_DISCARD_DATA (0xE0A4)
-    uint8_t DiscardData(std::iostream& stream) { return execCmd(stream, 0xE0A4); }
-
-    // PCR_CLEAR_ERROR (0xE0A2)
-    uint8_t ClearError(std::iostream& stream) { return execCmd(stream, 0xE0A2); }
-
-    // PCR_GO_OFFLINE (0xE0A6)
-    uint8_t GoOffline(std::iostream& stream) { return execCmd(stream, 0xE0A6); }
-
-    // PCR_RELEASE_UNIT (0xE0A9)
-    uint8_t ReleaseUnit(std::iostream& stream) { return execCmd(stream, 0xE0A9); }
-
-    // PCR_CLEAR_MISPRINT (0xE0A3)
-    uint8_t ClearMisprint(std::iostream& stream) { return execCmd(stream, 0xE0A3); }
-
-    // PCR_RESET_ENGINE (0xE0A1)
-    uint8_t ResetEngine(std::iostream& stream) { return execCmd(stream, 0xE0A1); }
+    uint8_t PC_RESERVE_UNIT(std::iostream& stream) { return execCmd(stream, 0xA2A0); }
+    uint8_t PCR_DISCARD_DATA(std::iostream& stream) { return execCmd(stream, 0xE0A4); }
+    uint8_t PCR_CLEAR_ERROR(std::iostream& stream) { return execCmd(stream, 0xE0A2); }
+    uint8_t PCR_GO_OFFLINE(std::iostream& stream) { return execCmd(stream, 0xE0A6); }
+    uint8_t PCR_RELEASE_UNIT(std::iostream& stream) { return execCmd(stream, 0xE0A9); }
+    uint8_t PCR_CLEAR_MISPRINT(std::iostream& stream) { return execCmd(stream, 0xE0A3); }
+    uint8_t PCR_RESET_ENGINE(std::iostream& stream) { return execCmd(stream, 0xE0A1); }
 }

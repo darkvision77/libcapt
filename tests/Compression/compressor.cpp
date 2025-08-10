@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
     std::println(stderr, "LineSize = {}", pp.ImageLineSize);
     std::println(stderr, "Lines = {}", pp.ImageLines);
 
-    Protocol::BeginPage(outStream, pp);
-    Protocol::BeginData(outStream);
+    Protocol::IC_BEGIN_PAGE(outStream, pp);
+    Protocol::IC_BEGIN_DATA(outStream);
     const std::size_t maxsize = 4096;
     while (true) {
         std::vector<uint8_t> buffer(maxsize);
@@ -88,8 +88,8 @@ int main(int argc, char* argv[]) {
         if (read == 0) {
             break;
         }
-        Protocol::VideoData(outStream, buffer.data(), read);
+        Protocol::IC_VIDEO_DATA(outStream, buffer.data(), read);
     }
-    Protocol::EndPage(outStream);
+    Protocol::IC_END_PAGE(outStream);
     return 0;
 }

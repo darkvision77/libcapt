@@ -8,21 +8,21 @@
 #include <cstdint>
 
 namespace Capt::Protocol {
-    void BeginPage(std::ostream& stream, const PageParams& params);
-    void BeginData(std::ostream& stream);
-    void EndPage(std::ostream& stream);
-    void VideoData(std::ostream& stream, uint8_t* data, std::size_t count);
-    ExtendedStatus GetExtendedStatus(std::iostream& stream);
-    BasicStatus GetBasicStatus(std::iostream& stream, uint8_t* changed = nullptr);
-    uint8_t GoOnline(std::iostream& stream, uint16_t pageNumber);
-    uint8_t Cleaning(std::iostream& stream);
-    uint8_t ReserveUnit(std::iostream& stream);
-    uint8_t DiscardData(std::iostream& stream);
-    uint8_t ClearError(std::iostream& stream);
-    uint8_t GoOffline(std::iostream& stream);
-    uint8_t ReleaseUnit(std::iostream& stream);
-    uint8_t ClearMisprint(std::iostream& stream);
-    uint8_t ResetEngine(std::iostream& stream);
+    void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params);
+    void IC_BEGIN_DATA(std::ostream& stream);
+    void IC_END_PAGE(std::ostream& stream);
+    void IC_VIDEO_DATA(std::ostream& stream, uint8_t* data, std::size_t count);
+    ExtendedStatus PC_GET_EXTENDED_STATUS(std::iostream& stream);
+    BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed = nullptr);
+    uint8_t PCR_GO_ONLINE(std::iostream& stream, uint16_t pageNumber);
+    uint8_t PCR_CLEANING(std::iostream& stream);
+    uint8_t PC_RESERVE_UNIT(std::iostream& stream);
+    uint8_t PCR_DISCARD_DATA(std::iostream& stream);
+    uint8_t PCR_CLEAR_ERROR(std::iostream& stream);
+    uint8_t PCR_GO_OFFLINE(std::iostream& stream);
+    uint8_t PCR_RELEASE_UNIT(std::iostream& stream);
+    uint8_t PCR_CLEAR_MISPRINT(std::iostream& stream);
+    uint8_t PCR_RESET_ENGINE(std::iostream& stream);
 }
 
 #endif

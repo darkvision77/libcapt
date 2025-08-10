@@ -19,7 +19,7 @@ namespace Capt {
     CaptPrinter::CaptPrinter(std::iostream& stream) : stream(stream), status(Protocol::ExtendedStatus()) {}
 
     Protocol::ExtendedStatus CaptPrinter::updateStatus() {
-        Protocol::ExtendedStatus ex = Protocol::GetExtendedStatus(this->stream);
+        Protocol::ExtendedStatus ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
         this->status.store(ex);
         return ex;
     }
@@ -34,7 +34,7 @@ namespace Capt {
 
     void CaptPrinter::ReserveUnit() {
         std::unique_lock lock(this->streamlock);
-        CHECK_RETCODE(Protocol::ReserveUnit(this->stream));
+        CHECK_RETCODE(Protocol::PC_RESERVE_UNIT(this->stream));
         Protocol::ExtendedStatus ex = this->updateStatus();
         if (!ex.UnitReserved()) {
             throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to reserve unit)");
@@ -45,34 +45,34 @@ namespace Capt {
         std::unique_lock lock(this->streamlock);
         Protocol::ExtendedStatus ex = this->updateStatus();
         assert(ex.UnitReserved());
-        CHECK_RETCODE(Protocol::ClearError(this->stream));
+        CHECK_RETCODE(Protocol::PCR_CLEAR_ERROR(this->stream));
         if (ex.Misprint()) {
-            CHECK_RETCODE(Protocol::ClearMisprint(this->stream));
+            CHECK_RETCODE(Protocol::PCR_CLEAR_MISPRINT(this->stream));
         }
         if ((ex.Controller & Protocol::ControllerStatus::ENGINE_COMM_ERROR) != 0) {
-            CHECK_RETCODE(Protocol::ResetEngine(this->stream));
+            CHECK_RETCODE(Protocol::PCR_RESET_ENGINE(this->stream));
         }
         if (ex.Rejected() || ex.VideoDataError()) {
-            CHECK_RETCODE(Protocol::DiscardData(this->stream));
+            CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
         }
     }
 
     bool CaptPrinter::GoOnline(unsigned page) {
         std::unique_lock lock(this->streamlock);
-        CHECK_RETCODE(Protocol::GoOnline(this->stream, page));
+        CHECK_RETCODE(Protocol::PCR_GO_ONLINE(this->stream, page));
         Protocol::ExtendedStatus ex = this->updateStatus();
         return ex.IsOnline();
     }
 
     void CaptPrinter::Cleaning() {
         std::unique_lock lock(this->streamlock);
-        CHECK_RETCODE(Protocol::Cleaning(this->stream));
+        CHECK_RETCODE(Protocol::PCR_CLEANING(this->stream));
     }
 
     bool CaptPrinter::WritePage(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
         std::unique_lock lock(this->streamlock);
-        Protocol::BeginPage(this->stream, params);
-        Protocol::BeginData(this->stream);
+        Protocol::IC_BEGIN_PAGE(this->stream, params);
+        Protocol::IC_BEGIN_DATA(this->stream);
         while (true) {
             std::vector<uint8_t> buffer(blockSize);
             std::streamsize read = videoStream.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
@@ -80,7 +80,7 @@ namespace Capt {
                 break;
             }
             while (true) {
-                Protocol::BasicStatus bs = Protocol::GetBasicStatus(this->stream);
+                Protocol::BasicStatus bs = Protocol::PCR_GET_BASIC_STATUS(this->stream);
                 if ((bs & Protocol::BasicStatus::NOT_READY) != 0) {
                     return false;
                 }
@@ -88,15 +88,15 @@ namespace Capt {
                     break;
                 }
             }
-            Protocol::VideoData(this->stream, buffer.data(), read);
+            Protocol::IC_VIDEO_DATA(this->stream, buffer.data(), read);
         }
-        Protocol::EndPage(this->stream);
+        Protocol::IC_END_PAGE(this->stream);
         return true;
     }
 
     void CaptPrinter::GoOffline() {
         std::unique_lock lock(this->streamlock);
-        CHECK_RETCODE(Protocol::GoOffline(this->stream));
+        CHECK_RETCODE(Protocol::PCR_GO_OFFLINE(this->stream));
         Protocol::ExtendedStatus ex = this->updateStatus();
         if (ex.IsOnline()) {
             throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to go offline)");
@@ -109,7 +109,7 @@ namespace Capt {
         if (!ex.UnitReserved()) {
             return;
         }
-        CHECK_RETCODE(Protocol::ReleaseUnit(this->stream));
+        CHECK_RETCODE(Protocol::PCR_RELEASE_UNIT(this->stream));
         ex = this->updateStatus();
         if (ex.UnitReserved()) {
             throw CaptPrinterError("Critical protocol error: unexpected behaviour (failed to reserve unit)");
