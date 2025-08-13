@@ -28,7 +28,9 @@ protected:
 
         while (true) {
             CaptPacket packet;
-            this->reader >> packet;
+            if (!(this->reader >> packet)) {
+                return traits_type::eof();
+            }
             if (packet.Opcode == 0xD0A0) {
                 this->LineSize = (static_cast<unsigned>(packet.Payload[31-4]) << 8) | static_cast<unsigned>(packet.Payload[30-4]);
                 this->LinesCount = (static_cast<unsigned>(packet.Payload[33-4]) << 8) | static_cast<unsigned>(packet.Payload[32-4]);
@@ -49,7 +51,7 @@ public:
     VideoDataStreambuf(std::istream& reader) : reader(reader) {
         this->underflow();
         if (this->LineSize == 0 || this->LinesCount == 0) {
-            throw std::runtime_error("failed to parse PBM file");
+            throw std::runtime_error("invalid input");
         }
     }
 };
