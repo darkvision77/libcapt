@@ -30,6 +30,8 @@ headers = files(
     'Protocol/PageParams.hpp',
     'Protocol/PrinterInfo.hpp',
     'Protocol/Protocol.hpp',
+    'Protocol/ProtocolError.hpp',
+    'Protocol/ReprintStatus.hpp',
 
     'BufferedPage.hpp',
     'CaptPrinter.hpp',
