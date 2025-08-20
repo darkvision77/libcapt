@@ -28,16 +28,15 @@ namespace Capt {
         }
 
         Protocol::ExtendedStatus updateStatus();
-
     public:
         explicit CaptPrinter(std::iostream& stream);
 
         Protocol::ExtendedStatus GetStatus();
         void ReserveUnit();
-        void ClearError();
+        void ClearError(Protocol::ExtendedStatus* status = nullptr);
         bool GoOnline(unsigned page);
         void Cleaning();
-        bool WritePage(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 4096);
+        bool WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 4096);
         void GoOffline();
         void ReleaseUnit();
         void WaitPrintEnd();

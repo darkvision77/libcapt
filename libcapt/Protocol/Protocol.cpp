@@ -6,7 +6,6 @@
 #include "Core/PacketReader.hpp"
 #include "ProtocolError.hpp"
 #include <cstdint>
-#include <expected>
 #include <format>
 
 namespace Capt::Protocol {
@@ -59,7 +58,7 @@ namespace Capt::Protocol {
         CaptPacket::WriteTo(stream, 0xC0A0, data) << std::flush;
     }
 
-    std::expected<ExtendedStatus, BasicStatus> PC_GET_EXTENDED_STATUS(std::iostream& stream) {
+    ExtendedStatus PC_GET_EXTENDED_STATUS(std::iostream& stream) {
         CaptPacket::WriteTo(stream, 0xA0A0) << std::flush;
 
         CaptPacket packet;
@@ -70,7 +69,7 @@ namespace Capt::Protocol {
         ExtendedStatus result;
         result.Basic = static_cast<BasicStatus>(reader.ReadByte());
         if ((result.Basic & BasicStatus::ERROR_BIT) != 0) {
-            return std::unexpected(result.Basic);
+            throw ProtocolError(std::format("PC_GET_EXTENDED_STATUS returned error: 0x{:02x}", static_cast<int>(result.Basic)));
         }
         reader.ReadByte(); // param_1 + 0x279
         result.Aux = static_cast<AuxStatus>(reader.ReadByte());

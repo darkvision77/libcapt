@@ -10,6 +10,7 @@ sources = files(
 
     'Protocol/Protocol.cpp',
 
+    'BufferedPage.cpp',
     'CaptPrinter.cpp',
 )
 
@@ -29,6 +30,7 @@ headers = files(
     'Protocol/PageParams.hpp',
     'Protocol/Protocol.hpp',
 
+    'BufferedPage.hpp',
     'CaptPrinter.hpp',
     'UnexpectedBehaviourError.hpp',
 )

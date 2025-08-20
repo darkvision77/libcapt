@@ -19,12 +19,9 @@ namespace Capt {
     CaptPrinter::CaptPrinter(std::iostream& stream) : stream(stream), status(Protocol::ExtendedStatus()) {}
 
     Protocol::ExtendedStatus CaptPrinter::updateStatus() {
-        auto ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
-        if (!ex) {
-            throw UnexpectedBehaviourError(std::format("PC_GET_EXTENDED_STATUS error (0x{:02X})", static_cast<uint8_t>(ex.error())));
-        }
-        this->status.store(*ex);
-        return *ex;
+        Protocol::ExtendedStatus ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
+        this->status.store(ex);
+        return ex;
     }
 
     Protocol::ExtendedStatus CaptPrinter::GetStatus() {
@@ -44,19 +41,17 @@ namespace Capt {
         }
     }
 
-    void CaptPrinter::ClearError() {
+    void CaptPrinter::ClearError(Protocol::ExtendedStatus* status) {
         std::unique_lock lock(this->streamlock);
-        Protocol::ExtendedStatus ex = this->updateStatus();
+        Protocol::ExtendedStatus ex = status == nullptr ? this->updateStatus() : *status;
         assert(ex.UnitReserved());
         CHECK_RETCODE(Protocol::PCR_CLEAR_ERROR(this->stream));
+        CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
         if (ex.Misprint()) {
             CHECK_RETCODE(Protocol::PCR_CLEAR_MISPRINT(this->stream));
         }
         if ((ex.Controller & Protocol::ControllerStatus::ENGINE_COMM_ERROR) != 0) {
             CHECK_RETCODE(Protocol::PCR_RESET_ENGINE(this->stream));
-        }
-        if (ex.Rejected() || ex.VideoDataError()) {
-            CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
         }
     }
 
@@ -64,7 +59,7 @@ namespace Capt {
         std::unique_lock lock(this->streamlock);
         CHECK_RETCODE(Protocol::PCR_GO_ONLINE(this->stream, page));
         Protocol::ExtendedStatus ex = this->updateStatus();
-        return ex.IsOnline();
+        return ex.Online();
     }
 
     void CaptPrinter::Cleaning() {
@@ -72,12 +67,12 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PCR_CLEANING(this->stream));
     }
 
-    bool CaptPrinter::WritePage(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
+    bool CaptPrinter::WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
         std::unique_lock lock(this->streamlock);
         Protocol::IC_BEGIN_PAGE(this->stream, params);
         Protocol::IC_BEGIN_DATA(this->stream);
+        std::vector<uint8_t> buffer(blockSize);
         while (true) {
-            std::vector<uint8_t> buffer(blockSize);
             std::streamsize read = videoStream.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
             if (read <= 0) {
                 break;
@@ -101,7 +96,7 @@ namespace Capt {
         std::unique_lock lock(this->streamlock);
         CHECK_RETCODE(Protocol::PCR_GO_OFFLINE(this->stream));
         Protocol::ExtendedStatus ex = this->updateStatus();
-        if (ex.IsOnline()) {
+        if (ex.Online()) {
             throw UnexpectedBehaviourError("failed to offline");
         }
     }

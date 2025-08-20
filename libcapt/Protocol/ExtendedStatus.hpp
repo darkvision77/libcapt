@@ -2,6 +2,7 @@
 #define _LIBCAPT_PROTOCOL_EXTENDED_STATUS_HPP_
 
 #include "Enums.hpp"
+#include "ReprintStatus.hpp"
 #include <cstdint>
 
 namespace Capt::Protocol {
@@ -17,43 +18,57 @@ namespace Capt::Protocol {
         uint16_t Shipped;
         uint16_t Printed;
 
-        inline constexpr bool CheckSlotPaper(int slot) const {
+        constexpr bool CheckSlotPaper(int slot) const {
             return (this->PaperAvailableBits & (0x80 >> (slot & 0x1f))) != 0;
         }
 
-        inline constexpr bool IsPrinting() const {
+        constexpr bool IsPrinting() const {
             return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0;
         }
 
-        inline constexpr bool ReadyToPrint() const {
+        constexpr bool Ready() const {
             return (this->Basic & BasicStatus::NOT_READY) == 0;
         }
 
-        inline constexpr bool UnitReserved() const {
+        constexpr bool UnitReserved() const {
             return (this->Basic & BasicStatus::UNIT_FREE) == 0;
         }
 
-        inline constexpr bool IsOnline() const {
-            return (this->Basic & BasicStatus::OFFLINE) == 0;
-        }
-
-        inline constexpr bool Misprint() const {
-            return (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT) != 0
-                || (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT_2) != 0;
-        }
-
-        inline constexpr bool Rejected() const {
-            return (this->Controller & ControllerStatus::PRINT_REJECTED) != 0;
-        }
-
-        inline constexpr bool VideoDataError() const {
+        constexpr bool VideoDataError() const {
             return (this->Controller & ControllerStatus::OVERRUN) != 0
                 || (this->Controller & ControllerStatus::UNDERRUN) != 0
                 || (this->Controller & ControllerStatus::INVALID_DATA) != 0
                 || (this->Controller & ControllerStatus::MISSING_EOP) != 0;
         }
 
-        inline constexpr bool WaitRequired() const {
+        constexpr bool Rejected() const {
+            return (this->Controller & ControllerStatus::PRINT_REJECTED) != 0;
+        }
+
+        constexpr ReprintStatus GetReprintStatus() const {
+            if (!this->Rejected()) {
+                return ReprintStatus::None;
+            }
+            return (this->Printed + 1 != this->Start) ? ReprintStatus::Prev : ReprintStatus::Current;
+        }
+
+        constexpr bool Misprint() const {
+            return (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT) != 0
+                || (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT_2) != 0;
+        }
+
+        constexpr bool ClearErrorNeeded() const {
+            return this->VideoDataError()
+                || this->Rejected()
+                || this->Misprint()
+                || (this->Controller & ControllerStatus::ENGINE_COMM_ERROR) != 0;
+        }
+
+        constexpr bool Online() const {
+            return (this->Basic & BasicStatus::OFFLINE) == 0;
+        }
+
+        constexpr bool WaitRequired() const {
             return (this->Controller & ControllerStatus::ENGINE_RESET_IN_PROGRESS) != 0
                 || (this->Engine & EngineReadyStatus::DOOR_OPEN) != 0
                 || (this->Engine & EngineReadyStatus::NO_CARTRIDGE) != 0
