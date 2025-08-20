@@ -15,3 +15,10 @@ executable(
     dependencies: [libcapt_dep, atomic_dep],
     install: false,
 )
+
+executable(
+    'printerinfo',
+    sources: files('printerinfo.cpp'),
+    dependencies: [libcapt_dep, atomic_dep],
+    install: false,
+)

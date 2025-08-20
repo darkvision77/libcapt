@@ -84,6 +84,27 @@ namespace Capt::Protocol {
         return result;
     }
 
+    PrinterInfo PC_GET_PRINTER_INFO(std::iostream& stream) {
+        CaptPacket::WriteTo(stream, 0xA1A1) << std::flush;
+
+        CaptPacket packet;
+        stream >> packet;
+        checkOpcode(packet.Opcode, 0xA1A1);
+        PacketReader reader = PacketReader(packet);
+
+        PrinterInfo result;
+        reader.ReadByte(); // local_15
+        reader.ReadByte(); // local_16
+        result.DeviceId = reader.ReadByte();
+        result.Type = reader.ReadByte();
+        result.VersionMajor = reader.ReadByte();
+        result.VersionMinor = reader.ReadByte();
+        result.BlockSize = reader.ReadUint16();
+        result.Buffers = reader.ReadUint16();
+        // other unknown fields
+        return result;
+    }
+
     BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed) {
         CaptPacket::WriteTo(stream, 0xE0A0) << std::flush;
 

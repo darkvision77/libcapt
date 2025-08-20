@@ -28,6 +28,7 @@ headers = files(
     'Protocol/Enums.hpp',
     'Protocol/ExtendedStatus.hpp',
     'Protocol/PageParams.hpp',
+    'Protocol/PrinterInfo.hpp',
     'Protocol/Protocol.hpp',
 
     'BufferedPage.hpp',
