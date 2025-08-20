@@ -11,7 +11,7 @@ namespace Capt {
         std::vector<uint8_t>::const_iterator iter;
 
     public:
-        explicit PacketReader(const CaptPacket& packet);
+        explicit PacketReader(const CaptPacket& packet) noexcept;
 
         uint8_t ReadByte();
         uint16_t ReadUint16();

@@ -15,7 +15,7 @@ namespace Capt {
 
         explicit CaptPacket() noexcept;
         explicit CaptPacket(uint16_t opcode) noexcept;
-        explicit CaptPacket(uint16_t opcode, const std::vector<uint8_t>& payload) noexcept;
+        explicit CaptPacket(uint16_t opcode, const std::vector<uint8_t>& payload);
 
         inline std::size_t Size() const noexcept {
             return this->Payload.size() + 4;

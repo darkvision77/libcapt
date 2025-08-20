@@ -4,7 +4,7 @@
 namespace Capt {
     static const int MaxPacketSize = UINT16_MAX;
 
-    PacketBuilder::PacketBuilder(uint16_t opcode) : Packet(CaptPacket(opcode)) {}
+    PacketBuilder::PacketBuilder(uint16_t opcode) noexcept : Packet(opcode) {}
 
     void PacketBuilder::AppendByte(uint8_t value) {
         this->AppendBytes(&value, 1);

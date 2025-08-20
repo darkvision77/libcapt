@@ -29,7 +29,7 @@ namespace Capt::Compression {
         int_type underflow() override;
 
     public:
-        explicit DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog);
+        explicit DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog) noexcept;
     };
 }
 

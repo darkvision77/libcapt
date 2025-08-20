@@ -29,7 +29,7 @@ namespace Capt::Compression {
         return read;
     }
 
-    DecoderStreambuf::DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog)
+    DecoderStreambuf::DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog) noexcept
         : reader(reader), commandLog(commandLog), lineSize(lineSize), videoSize(0) {}
 
     void DecoderStreambuf::repeat(unsigned count, uint8_t repeatByte) {

@@ -4,7 +4,7 @@
 namespace Capt {
     CaptPacket::CaptPacket() noexcept : CaptPacket(0) {}
     CaptPacket::CaptPacket(uint16_t opcode) noexcept : Opcode(opcode) {}
-    CaptPacket::CaptPacket(uint16_t opcode, const std::vector<uint8_t>& payload) noexcept : Opcode(opcode), Payload(payload) {}
+    CaptPacket::CaptPacket(uint16_t opcode, const std::vector<uint8_t>& payload) : Opcode(opcode), Payload(payload) {}
 
     static void writeUint16(std::ostream& stream, uint16_t value) {
         if (!stream.good()) {

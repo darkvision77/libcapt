@@ -29,7 +29,7 @@ namespace Capt {
 
         Protocol::ExtendedStatus updateStatus();
     public:
-        explicit CaptPrinter(std::iostream& stream);
+        explicit CaptPrinter(std::iostream& stream) noexcept;
 
         Protocol::ExtendedStatus GetStatus();
         void ReserveUnit();

@@ -1,7 +1,7 @@
 #include "PacketReader.hpp"
 
 namespace Capt {
-    PacketReader::PacketReader(const CaptPacket& packet) : packet(packet), iter(packet.Payload.cbegin()) {}
+    PacketReader::PacketReader(const CaptPacket& packet) noexcept : packet(packet), iter(packet.Payload.cbegin()) {}
 
     uint8_t PacketReader::ReadByte() {
         if (this->iter == packet.Payload.end()) {
