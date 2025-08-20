@@ -8,3 +8,10 @@ executable(
     dependencies: [libcapt_dep, atomic_dep],
     install: false,
 )
+
+executable(
+    'getstatus',
+    sources: files('getstatus.cpp'),
+    dependencies: [libcapt_dep, atomic_dep],
+    install: false,
+)
