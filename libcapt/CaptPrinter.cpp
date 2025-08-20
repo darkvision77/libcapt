@@ -32,6 +32,14 @@ namespace Capt {
         return this->status.load();
     }
 
+    Protocol::PrinterInfo CaptPrinter::GetPrinterInfo() {
+        if (!this->cachedInfo) {
+            std::unique_lock lock(this->streamlock);
+            this->cachedInfo = Protocol::PC_GET_PRINTER_INFO(this->stream);
+        }
+        return *this->cachedInfo;
+    }
+
     void CaptPrinter::ReserveUnit() {
         std::unique_lock lock(this->streamlock);
         CHECK_RETCODE(Protocol::PC_RESERVE_UNIT(this->stream));
@@ -68,6 +76,11 @@ namespace Capt {
     }
 
     bool CaptPrinter::WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
+        if (blockSize == 0) {
+            blockSize = this->GetPrinterInfo().BlockSize;
+        }
+        assert((blockSize + 4) <= UINT16_MAX);
+
         std::unique_lock lock(this->streamlock);
         Protocol::IC_BEGIN_PAGE(this->stream, params);
         Protocol::IC_BEGIN_DATA(this->stream);
@@ -116,8 +129,8 @@ namespace Capt {
 
     void CaptPrinter::WaitPrintEnd() {
         std::unique_lock lock(this->streamlock);
-        this->waitStatus([](Protocol::ExtendedStatus ex) {
+        this->WaitStatus([](Protocol::ExtendedStatus ex) {
             return !ex.IsPrinting();
-        }, 1000);
+        }, std::chrono::seconds(1));
     }
 }
