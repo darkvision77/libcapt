@@ -55,7 +55,8 @@ TEST(BufferedPage, Move) {
     ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 
-    BufferedPage newpage = std::move(page);
+    BufferedPage newpage(123, Protocol::PageParams{}, nullptr);
+    newpage = std::move(page);
     ASSERT_EQ(newpage.sgetn(temp.data(), temp.size()), temp.size());
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
