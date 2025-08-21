@@ -132,7 +132,7 @@ static bool writePage(CaptPrinter& printer, BufferedPage& page, BufferedPage* pr
     Protocol::ReprintStatus reprint = Protocol::ReprintStatus::None;
     while (true) {
         BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
-        p.ResetPos();
+        p.pubseekpos(0);
         prepareBeforePrint(printer, p.PageNumber);
         if (reprint != Protocol::ReprintStatus::None) {
             std::println("Retrying page {}...", p.PageNumber);

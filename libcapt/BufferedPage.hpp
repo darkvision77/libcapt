@@ -13,6 +13,8 @@ namespace Capt {
         std::size_t blockSize = 4096;
 
         int_type underflow() override;
+        pos_type seekpos(pos_type pos, std::ios_base::openmode which) override;
+        pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override;
     public:
         unsigned PageNumber = 0;
         Protocol::PageParams Params;
@@ -24,8 +26,6 @@ namespace Capt {
         BufferedPage(const BufferedPage& other) = delete;
         BufferedPage(BufferedPage&& other) noexcept;
         void operator=(BufferedPage&& other) noexcept;
-
-        void ResetPos() noexcept;
     };
 }
 

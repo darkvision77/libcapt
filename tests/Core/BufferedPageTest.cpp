@@ -1,0 +1,79 @@
+#include "libcapt/BufferedPage.hpp"
+#include "gmock/gmock.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <ios>
+#include "MemoryStream.hpp"
+#include "libcapt/Protocol/PageParams.hpp"
+
+using namespace Capt;
+
+TEST(BufferedPage, SeekPos) {
+    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+    MemoryStream ms(buff);
+    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+
+    std::vector<char> temp(buff.size());
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), 0);
+    ASSERT_EQ(page.pubseekpos(0), 0);
+
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+}
+
+TEST(BufferedPage, SeekOff) {
+    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+    MemoryStream ms(buff);
+    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+
+    std::vector<char> temp(buff.size());
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    ASSERT_EQ(page.pubseekoff(0, std::ios_base::beg), 0);
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    ASSERT_EQ(page.pubseekoff(-temp.size(), std::ios_base::cur), 0);
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    ASSERT_EQ(page.pubseekoff(-temp.size(), std::ios_base::end), 0);
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+}
+
+TEST(BufferedPage, Move) {
+    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+    MemoryStream ms(buff);
+    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+
+    std::vector<char> temp(buff.size());
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    BufferedPage newpage = std::move(page);
+    ASSERT_EQ(newpage.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+}
+
+TEST(BufferedPage, PartRead) {
+    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    MemoryStream ms(buff);
+    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+
+    std::vector<char> temp(8);
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray({1, 2, 3, 4, 5, 6, 7, 8}));
+
+    ASSERT_EQ(page.pubseekpos(0), 0);
+
+    std::vector<char> full(buff.size());
+    ASSERT_EQ(page.sgetn(full.data(), full.size()), full.size());
+    ASSERT_THAT(full, testing::ElementsAreArray(buff));
+
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), 0);
+}

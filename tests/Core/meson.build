@@ -1,4 +1,5 @@
 tests = [
+    'BufferedPageTest',
     'CaptPacketTest',
     'PacketBuilderTest',
     'PacketReaderTest',
