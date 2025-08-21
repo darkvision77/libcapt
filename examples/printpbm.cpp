@@ -6,10 +6,12 @@
 #include "libcapt/Protocol/PageParams.hpp"
 #include "libcapt/Protocol/ReprintStatus.hpp"
 #include <cassert>
+#include <csignal>
 #include <iostream>
 #include <print>
 #include <fstream>
 #include <stdexcept>
+#include <stop_token>
 #include <thread>
 
 using namespace Capt;
@@ -79,12 +81,12 @@ public:
     }
 };
 
-static Protocol::ExtendedStatus waitReady(CaptPrinter& printer) {
+static Protocol::ExtendedStatus waitReady(std::stop_token stopToken, CaptPrinter& printer) {
     Protocol::ExtendedStatus status = printer.GetStatus();
     if (status.Ready()) {
         return status;
     }
-    while (!status.Ready()) {
+    while (!status.Ready() && !stopToken.stop_requested()) {
         std::print("\033[2K\r");
         if ((status.Engine & Protocol::EngineReadyStatus::DOOR_OPEN) != 0) {
             std::print("Not ready: DOOR_OPEN");
@@ -116,24 +118,33 @@ static Protocol::ExtendedStatus waitReady(CaptPrinter& printer) {
     return status;
 }
 
-static void prepareBeforePrint(CaptPrinter& printer, unsigned page) {
-    Protocol::ExtendedStatus status = waitReady(printer);
-    assert(status.Ready());
-    if (!status.Online() || status.Start != page) {
-        if (!printer.GoOnline(page)) {
-            std::println("Failed to go online, retrying...");
-            std::this_thread::sleep_for(1s);
-            return prepareBeforePrint(printer, page);
+static void prepareBeforePrint(std::stop_token stopToken, CaptPrinter& printer, unsigned page) {
+    while (true) {
+        Protocol::ExtendedStatus status = waitReady(stopToken, printer);
+        if (stopToken.stop_requested()) {
+            return;
         }
+        assert(status.Ready());
+        if (!status.Online() || status.Start != page) {
+            if (!printer.GoOnline(page)) {
+                std::println("Failed to go online, retrying...");
+                std::this_thread::sleep_for(1s);
+                continue;
+            }
+        }
+        break;
     }
 }
 
-static bool writePage(CaptPrinter& printer, BufferedPage& page, BufferedPage* prev) {
+static bool writePage(std::stop_token stopToken, CaptPrinter& printer, BufferedPage& page, BufferedPage* prev) {
     Protocol::ReprintStatus reprint = Protocol::ReprintStatus::None;
-    while (true) {
+    while (!stopToken.stop_requested()) {
         BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
         p.pubseekpos(0);
-        prepareBeforePrint(printer, p.PageNumber);
+        prepareBeforePrint(stopToken, printer, p.PageNumber);
+        if (stopToken.stop_requested()) {
+            return true;
+        }
         if (reprint != Protocol::ReprintStatus::None) {
             std::println("Retrying page {}...", p.PageNumber);
         } else {
@@ -146,35 +157,40 @@ static bool writePage(CaptPrinter& printer, BufferedPage& page, BufferedPage* pr
             }
             break;
         }
-        printer.WaitPrintEnd();
-        Protocol::ExtendedStatus status = printer.GetStatus();
-        if (status.VideoDataError()) {
+        auto status = printer.WaitPrintEnd(stopToken);
+        if (!status) {
+            return true;
+        }
+        if (status->VideoDataError()) {
             return false;
         }
-        reprint = status.GetReprintStatus();
-        assert(!status.Ready());
+        reprint = status->GetReprintStatus();
+        assert(!status->Ready());
         std::this_thread::sleep_for(1s);
     }
     return true;
 }
 
-static bool waitLastPage(CaptPrinter& printer, BufferedPage& page) {
-    while (true) {
+static bool waitLastPage(std::stop_token stopToken, CaptPrinter& printer, BufferedPage& page) {
+    while (!stopToken.stop_requested()) {
         std::this_thread::sleep_for(1s);
-        printer.WaitPrintEnd();
-        Protocol::ExtendedStatus status = printer.GetStatus();
-        if (status.VideoDataError()) {
+        auto status = printer.WaitPrintEnd(stopToken);
+        if (!status) {
+            return true;
+        }
+        if (status->VideoDataError()) {
             return false;
-        } else if (status.GetReprintStatus() == Protocol::ReprintStatus::None) {
+        } else if (status->GetReprintStatus() == Protocol::ReprintStatus::None) {
             break;
         }
-        if (!writePage(printer, page, nullptr)) {
-            std::println("WritePage fatal error");
+        if (!writePage(stopToken, printer, page, nullptr)) {
             return false;
         }
     }
     return true;
 }
+
+std::stop_source stopSrc;
 
 int main(int argc, char* argv[]) {
     std::setbuf(stdout, nullptr);
@@ -194,6 +210,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::signal(SIGINT, +[](int) {
+        std::println("Stopping...");
+        stopSrc.request_stop();
+    });
+    std::stop_token stopToken = stopSrc.get_token();
+
     PbmPageProvider prov(pbmStream);
     CaptPrinter printer(printerStream);
 
@@ -202,7 +224,7 @@ int main(int argc, char* argv[]) {
 
     unsigned page = 0;
     BufferedPage prevPage;
-    while (true) {
+    while (!stopToken.stop_requested()) {
         auto params = prov.ReadHeader();
         if (!params) {
             break;
@@ -210,7 +232,7 @@ int main(int argc, char* argv[]) {
         Compression::ScoaStreambuf ss(*pbmStream.rdbuf(), params->ImageLineSize, params->ImageLines);
         BufferedPage currPage(page, *params, &ss);
 
-        if (!writePage(printer, currPage, page == 0 ? nullptr : &prevPage)) {
+        if (!writePage(stopToken, printer, currPage, page == 0 ? nullptr : &prevPage)) {
             std::println("Error: WritePage failed");
             return 1;
         }
@@ -218,7 +240,7 @@ int main(int argc, char* argv[]) {
         page++;
     }
 
-    if (page != 0 && !waitLastPage(printer, prevPage)) {
+    if (page != 0 && !waitLastPage(stopToken, printer, prevPage)) {
         std::println("Error: waitLastPage failed");
         return 1;
     }

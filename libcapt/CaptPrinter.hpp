@@ -9,6 +9,7 @@
 #include <mutex>
 #include <chrono>
 #include <optional>
+#include <stop_token>
 #include <thread>
 
 namespace Capt {
@@ -32,23 +33,42 @@ namespace Capt {
         void Cleaning();
 
         // If blockSize is zero, it will be taken from PrinterInfo
-        bool WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0);
+        bool WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0);
+        inline bool WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
+            return this->WriteVideoData(std::stop_token{}, params, videoStream, blockSize);
+        }
 
         void GoOffline();
         void ReleaseUnit();
 
+        // nullopt if stop requested
         template<typename TFunc, typename Rep, typename Period>
-        Protocol::ExtendedStatus WaitStatus(TFunc func, const std::chrono::duration<Rep, Period>& delay) {
-            while (true) {
-                Protocol::ExtendedStatus ex = this->updateStatus();
+        std::optional<Protocol::ExtendedStatus> WaitStatus(std::stop_token stopToken, TFunc func, const std::chrono::duration<Rep, Period>& delay) {
+            while (!stopToken.stop_requested()) {
+                Protocol::ExtendedStatus ex = this->GetStatus();
                 if (func(ex)) {
                     return ex;
                 }
                 std::this_thread::sleep_for(delay);
             }
+            return std::nullopt;
         }
 
-        void WaitPrintEnd();
+        template<typename TFunc, typename Rep, typename Period>
+        Protocol::ExtendedStatus WaitStatus(TFunc func, const std::chrono::duration<Rep, Period>& delay) {
+            return this->WaitStatus(std::stop_token{}, func, delay).value();
+        }
+
+        // nullopt if stop requested
+        inline std::optional<Protocol::ExtendedStatus> WaitPrintEnd(std::stop_token stopToken) {
+            return this->WaitStatus(stopToken, [](Protocol::ExtendedStatus ex) {
+                return !ex.IsPrinting();
+            }, std::chrono::seconds(1));
+        }
+
+        inline Protocol::ExtendedStatus WaitPrintEnd() {
+            return this->WaitPrintEnd(std::stop_token{}).value();
+        }
     };
 }
 

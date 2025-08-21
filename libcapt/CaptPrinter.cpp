@@ -75,7 +75,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PCR_CLEANING(this->stream));
     }
 
-    bool CaptPrinter::WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
+    bool CaptPrinter::WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
         if (blockSize == 0) {
             blockSize = this->GetPrinterInfo().BlockSize;
         }
@@ -90,7 +90,7 @@ namespace Capt {
             if (read <= 0) {
                 break;
             }
-            while (true) {
+            while (!stopToken.stop_requested()) {
                 Protocol::BasicStatus bs = Protocol::PCR_GET_BASIC_STATUS(this->stream);
                 if ((bs & Protocol::BasicStatus::NOT_READY) != 0) {
                     return false;
@@ -98,6 +98,9 @@ namespace Capt {
                 if ((bs & Protocol::BasicStatus::IM_DATA_BUSY) == 0) {
                     break;
                 }
+            }
+            if (stopToken.stop_requested()) {
+                return false;
             }
             Protocol::IC_VIDEO_DATA(this->stream, {buffer.data(), static_cast<std::size_t>(read)});
         }
@@ -125,12 +128,5 @@ namespace Capt {
         if (ex.UnitReserved()) {
             throw UnexpectedBehaviourError("failed to reserve unit");
         }
-    }
-
-    void CaptPrinter::WaitPrintEnd() {
-        std::unique_lock lock(this->streamlock);
-        this->WaitStatus([](Protocol::ExtendedStatus ex) {
-            return !ex.IsPrinting();
-        }, std::chrono::seconds(1));
     }
 }
