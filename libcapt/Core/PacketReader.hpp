@@ -3,6 +3,7 @@
 
 #include "CaptPacket.hpp"
 #include <cstdint>
+#include <span>
 
 namespace Capt {
     class PacketReader {
@@ -16,6 +17,7 @@ namespace Capt {
         uint8_t ReadByte();
         uint16_t ReadUint16();
         uint32_t ReadUint32();
+        std::span<const uint8_t> ReadBytes(std::size_t count);
     };
 }
 

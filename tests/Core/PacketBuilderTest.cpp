@@ -37,7 +37,7 @@ TEST(PacketBuilder, AppendBytes) {
     PacketBuilder builder(0x1234);
     builder.AppendByte(1);
     builder.AppendByte(2);
-    builder.AppendBytes(data.data(), data.size());
+    builder.AppendBytes(data);
     builder.AppendByte(3);
     ASSERT_EQ(builder.Packet.Opcode, 0x1234);
     EXPECT_THAT(builder.Packet.Payload, ElementsAre(1, 2, 0xff, 0x0f, 0xaa, 3));
@@ -47,7 +47,7 @@ TEST(PacketBuilder, Overflow) {
     EXPECT_THROW({
         std::vector<uint8_t> data(0xffff - 7);
         PacketBuilder builder(0x1234);
-        builder.AppendBytes(data.data(), data.size());
+        builder.AppendBytes(data);
         builder.AppendUint32(1);
     }, std::overflow_error);
 }
@@ -56,6 +56,6 @@ TEST(PacketBuilder, AppendBytesOverflow) {
     EXPECT_THROW({
         std::vector<uint8_t> data(0xffff);
         PacketBuilder builder(0x1234);
-        builder.AppendBytes(data.data(), data.size());
+        builder.AppendBytes(data);
     }, std::overflow_error);
 }
