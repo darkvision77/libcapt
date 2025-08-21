@@ -8,6 +8,8 @@ sources = files(
     'Core/PacketBuilder.cpp',
     'Core/PacketReader.cpp',
 
+    'Utility/CropStreambuf.cpp',
+
     'Protocol/Protocol.cpp',
 
     'BufferedPage.cpp',
@@ -24,6 +26,9 @@ headers = files(
     'Core/CaptPacket.hpp',
     'Core/PacketBuilder.hpp',
     'Core/PacketReader.hpp',
+
+    'Utility/Crop.hpp',
+    'Utility/CropStreambuf.hpp',
 
     'Protocol/Enums.hpp',
     'Protocol/ExtendedStatus.hpp',

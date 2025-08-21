@@ -1,6 +1,7 @@
 tests = [
     'BufferedPageTest',
     'CaptPacketTest',
+    'CropStreambufTest',
     'PacketBuilderTest',
     'PacketReaderTest',
     'ProtocolTest',
