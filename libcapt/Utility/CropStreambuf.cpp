@@ -12,7 +12,7 @@ namespace Capt::Utility {
         while (read != count) {
             std::streambuf::int_type c = stream.sbumpc();
             read++;
-            if (std::streambuf::traits_type::eq_int_type(c, std::streambuf::traits_type::eof())) {
+            if (c == std::streambuf::traits_type::eof()) {
                 break;
             }
         }
