@@ -27,7 +27,7 @@ namespace Capt {
         Protocol::PrinterInfo GetPrinterInfo();
 
         void ReserveUnit();
-        void ClearError(Protocol::ExtendedStatus* status = nullptr);
+        void ClearError(const Protocol::ExtendedStatus* status = nullptr);
         bool GoOnline(unsigned page);
         void Cleaning();
 

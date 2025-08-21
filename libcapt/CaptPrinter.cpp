@@ -49,7 +49,7 @@ namespace Capt {
         }
     }
 
-    void CaptPrinter::ClearError(Protocol::ExtendedStatus* status) {
+    void CaptPrinter::ClearError(const Protocol::ExtendedStatus* status) {
         std::unique_lock lock(this->streamlock);
         Protocol::ExtendedStatus ex = status == nullptr ? this->updateStatus() : *status;
         assert(ex.UnitReserved());
