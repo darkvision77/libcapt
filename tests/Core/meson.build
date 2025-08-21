@@ -3,6 +3,7 @@ tests = [
     'CaptPacketTest',
     'PacketBuilderTest',
     'PacketReaderTest',
+    'ProtocolTest',
 ]
 
 gtest_dep = dependency('gtest', main: true)
