@@ -8,11 +8,11 @@ sources = files(
     'Core/PacketBuilder.cpp',
     'Core/PacketReader.cpp',
 
+    'Utility/BufferedPage.cpp',
     'Utility/CropStreambuf.cpp',
 
     'Protocol/Protocol.cpp',
 
-    'BufferedPage.cpp',
     'CaptPrinter.cpp',
 )
 
@@ -27,6 +27,7 @@ headers = files(
     'Core/PacketBuilder.hpp',
     'Core/PacketReader.hpp',
 
+    'Utility/BufferedPage.hpp',
     'Utility/Crop.hpp',
     'Utility/CropStreambuf.hpp',
 
@@ -38,7 +39,6 @@ headers = files(
     'Protocol/ProtocolError.hpp',
     'Protocol/ReprintStatus.hpp',
 
-    'BufferedPage.hpp',
     'CaptPrinter.hpp',
     'UnexpectedBehaviourError.hpp',
 )

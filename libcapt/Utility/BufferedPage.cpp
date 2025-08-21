@@ -1,6 +1,6 @@
 #include "BufferedPage.hpp"
 
-namespace Capt {
+namespace Capt::Utility {
     using int_type = BufferedPage::int_type;
     using pos_type = BufferedPage::pos_type;
     using off_type = BufferedPage::off_type;

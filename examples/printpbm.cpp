@@ -1,4 +1,4 @@
-#include "libcapt/BufferedPage.hpp"
+#include "libcapt/Utility/BufferedPage.hpp"
 #include "libcapt/CaptPrinter.hpp"
 #include "libcapt/Compression/ScoaStreambuf.hpp"
 #include "libcapt/Protocol/Enums.hpp"
@@ -136,10 +136,10 @@ static void prepareBeforePrint(std::stop_token stopToken, CaptPrinter& printer, 
     }
 }
 
-static bool writePage(std::stop_token stopToken, CaptPrinter& printer, BufferedPage& page, BufferedPage* prev) {
+static bool writePage(std::stop_token stopToken, CaptPrinter& printer, Utility::BufferedPage& page, Utility::BufferedPage* prev) {
     Protocol::ReprintStatus reprint = Protocol::ReprintStatus::None;
     while (!stopToken.stop_requested()) {
-        BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
+        Utility::BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
         p.pubseekpos(0);
         prepareBeforePrint(stopToken, printer, p.PageNumber);
         if (stopToken.stop_requested()) {
@@ -171,7 +171,7 @@ static bool writePage(std::stop_token stopToken, CaptPrinter& printer, BufferedP
     return true;
 }
 
-static bool waitLastPage(std::stop_token stopToken, CaptPrinter& printer, BufferedPage& page) {
+static bool waitLastPage(std::stop_token stopToken, CaptPrinter& printer, Utility::BufferedPage& page) {
     while (!stopToken.stop_requested()) {
         std::this_thread::sleep_for(1s);
         auto status = printer.WaitPrintEnd(stopToken);
@@ -223,14 +223,14 @@ int main(int argc, char* argv[]) {
     printer.ClearError();
 
     unsigned page = 0;
-    BufferedPage prevPage;
+    Utility::BufferedPage prevPage;
     while (!stopToken.stop_requested()) {
         auto params = prov.ReadHeader();
         if (!params) {
             break;
         }
         Compression::ScoaStreambuf ss(*pbmStream.rdbuf(), params->ImageLineSize, params->ImageLines);
-        BufferedPage currPage(page, *params, &ss);
+        Utility::BufferedPage currPage(page, *params, &ss);
 
         if (!writePage(stopToken, printer, currPage, page == 0 ? nullptr : &prevPage)) {
             std::println("Error: WritePage failed");

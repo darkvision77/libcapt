@@ -1,4 +1,4 @@
-#include "libcapt/BufferedPage.hpp"
+#include "libcapt/Utility/BufferedPage.hpp"
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
@@ -11,7 +11,7 @@ using namespace Capt;
 TEST(BufferedPage, SeekPos) {
     const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
-    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+    Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
     std::vector<char> temp(buff.size());
     ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
@@ -27,7 +27,7 @@ TEST(BufferedPage, SeekPos) {
 TEST(BufferedPage, SeekOff) {
     const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
-    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+    Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
     std::vector<char> temp(buff.size());
     ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
@@ -46,16 +46,30 @@ TEST(BufferedPage, SeekOff) {
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
 
-TEST(BufferedPage, Move) {
+TEST(BufferedPage, MoveCtor) {
     const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
-    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+    Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
     std::vector<char> temp(buff.size());
     ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 
-    BufferedPage newpage(123, Protocol::PageParams{}, nullptr);
+    Utility::BufferedPage newpage(std::move(page));
+    ASSERT_EQ(newpage.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+}
+
+TEST(BufferedPage, MoveAssign) {
+    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+    MemoryStream ms(buff);
+    Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+
+    std::vector<char> temp(buff.size());
+    ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());
+    ASSERT_THAT(temp, testing::ElementsAreArray(buff));
+
+    Utility::BufferedPage newpage(123, Protocol::PageParams{}, nullptr);
     newpage = std::move(page);
     ASSERT_EQ(newpage.sgetn(temp.data(), temp.size()), temp.size());
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
@@ -64,7 +78,7 @@ TEST(BufferedPage, Move) {
 TEST(BufferedPage, PartRead) {
     const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     MemoryStream ms(buff);
-    BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
+    Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
     std::vector<char> temp(8);
     ASSERT_EQ(page.sgetn(temp.data(), temp.size()), temp.size());

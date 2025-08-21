@@ -1,11 +1,11 @@
-#ifndef _LIBCAPT_BUFFERED_PAGE_HPP_
-#define _LIBCAPT_BUFFERED_PAGE_HPP_
+#ifndef _LIBCAPT_UTILITY_BUFFERED_PAGE_HPP_
+#define _LIBCAPT_UTILITY_BUFFERED_PAGE_HPP_
 
-#include "Protocol/PageParams.hpp"
+#include "../Protocol/PageParams.hpp"
 #include <streambuf>
 #include <vector>
 
-namespace Capt {
+namespace Capt::Utility {
     class BufferedPage : public std::streambuf {
     private:
         std::vector<char_type> buffer;
