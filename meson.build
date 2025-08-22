@@ -5,7 +5,7 @@ project(
     license_files: ['LICENSE'],
     default_options: [
         'buildtype=debugoptimized',
-        'b_debug=if-release',
+        'b_ndebug=if-release',
         'warning_level=3',
         'cpp_std=c++23',
     ],
