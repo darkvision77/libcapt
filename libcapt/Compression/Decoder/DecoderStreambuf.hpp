@@ -4,6 +4,7 @@
 #include <ostream>
 #include <streambuf>
 #include <vector>
+#include <cstdint>
 
 namespace Capt::Compression {
     class DecoderStreambuf : public std::streambuf {
