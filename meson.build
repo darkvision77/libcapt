@@ -8,6 +8,7 @@ project(
         'b_ndebug=if-release',
         'warning_level=3',
         'cpp_std=c++23',
+        'b_lundef=false',
     ],
     meson_version: '>=1.7.0'
 )
