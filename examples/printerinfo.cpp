@@ -40,7 +40,7 @@ static std::size_t fillBuffer(std::iostream& printerStream, std::size_t batchSiz
         }
         Protocol::IC_VIDEO_DATA(printerStream, buffer);
         count += buffer.size();
-        std::printf("\033[2K\rFilling: %lu", count);
+        std::printf("\033[2K\rFilling: %zu", count);
         std::fflush(stdout);
     }
     std::putchar('\n');
@@ -107,6 +107,6 @@ int main(int argc, char* argv[]) {
     Protocol::PCR_DISCARD_DATA(printerStream);
     buffSize = fillBuffer(printerStream, batchSize, buffSize - thresh);
 
-    std::printf("Video buffer size: %lu\n", buffSize);
+    std::printf("Video buffer size: %zu\n", buffSize);
     return 0;
 }
