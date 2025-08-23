@@ -1,15 +1,18 @@
 #include "DecoderStreambuf.hpp"
 #include "DecoderError.hpp"
 #include <cassert>
-#include <format>
+#include <iomanip>
+#include <sstream>
 #include <streambuf>
 
 namespace Capt::Compression {
-    #define CLOG(...) if (this->commandLog) *this->commandLog << std::format(__VA_ARGS__) << std::flush
+    #define CLOG(STR) if (this->commandLog) *this->commandLog << STR << std::flush
     #define CHECK_BOUNDS(PARAM, MIN, MAX) checkBounds(PARAM, MIN, MAX, #PARAM)
     inline static void checkBounds(int value, int min, int max, std::string_view paramName) {
         if (value < min || value > max) {
-            throw DecoderError(std::format("{} must be in range [{};{}], got {}", paramName, min, max, value));
+            std::ostringstream ss;
+            ss << paramName << " must be in range [" << min << ';' << max << "], got " << value;
+            throw DecoderError(ss.str());
         }
     }
 
@@ -178,7 +181,10 @@ namespace Capt::Compression {
                 return 2 + rawCount;
             }
         }
-        throw DecoderError(std::format("unknown command: {:#x}", cmd));
+
+        std::ostringstream ss("unknown command: 0x");
+        ss << std::hex << std::setfill('0') << std::setw(2) << cmd;
+        throw DecoderError(ss.str());
     }
 
     bool DecoderStreambuf::decodeLine() {

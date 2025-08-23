@@ -4,15 +4,19 @@
 #include "Protocol/ExtendedStatus.hpp"
 #include "Protocol/PageParams.hpp"
 #include "Protocol/Protocol.hpp"
-#include <format>
+#include <iomanip>
 #include <mutex>
 #include <cassert>
+#include <sstream>
+#include <vector>
 
 namespace Capt {
     #define CHECK_RETCODE(EXP) checkRetcode(EXP, #EXP)
-    static inline void checkRetcode(uint8_t cmdResult, std::string_view paramName) {
+    inline static void checkRetcode(uint8_t cmdResult, std::string_view paramName) {
         if (cmdResult != 0) {
-            throw UnexpectedBehaviourError(std::format("{} returned non-successfull code (0x{:02X})", paramName, cmdResult));
+            std::ostringstream ss;
+            ss << paramName << " returned non-successfull code (0x" << std::hex << std::setfill('0') << std::setw(2) << cmdResult << ')';
+            throw UnexpectedBehaviourError(ss.str());
         }
     }
 

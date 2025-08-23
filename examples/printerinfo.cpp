@@ -4,19 +4,18 @@
 #include <cassert>
 #include <cstdio>
 #include <iostream>
-#include <print>
 #include <fstream>
 #include <vector>
 
 using namespace Capt;
 
 static void printPrinterInfo(Protocol::PrinterInfo info) {
-    std::println("Printer Info:");
-    std::println("    Type = {}", info.Type);
-    std::println("    Version = {}.{:02}", info.VersionMajor, info.VersionMinor);
-    std::println("    BlockSize = {}", info.BlockSize);
-    std::println("    Buffers = {}", info.Buffers);
-    std::println("    RAM Total = {:.02f} MB", (static_cast<double>(info.BlockSize * info.Buffers) / 1024.0) / 1024.0);
+    std::puts("Printer Info:");
+    std::printf("    Type = %u\n", info.Type);
+    std::printf("    Version = %u.%02u\n", info.VersionMajor, info.VersionMinor);
+    std::printf("    BlockSize = %u\n", info.BlockSize);
+    std::printf("    Buffers = %u\n", info.Buffers);
+    std::printf("    RAM Total = %.02f MB\n", (static_cast<double>(info.BlockSize * info.Buffers) / 1024.0) / 1024.0);
 }
 
 static std::size_t fillBuffer(std::iostream& printerStream, std::size_t batchSize, std::size_t thresh = 0) {
@@ -32,30 +31,30 @@ static std::size_t fillBuffer(std::iostream& printerStream, std::size_t batchSiz
             break;
         }
         if ((bs & Protocol::BasicStatus::CMD_BUSY) != 0) {
-            std::println("\nfillBuffer error: CMD_BUSY");
+            std::puts("\nfillBuffer error: CMD_BUSY");
             break;
         }
         if ((bs & Protocol::BasicStatus::ERROR_BIT) != 0) {
-            std::println("\nfillBuffer error: ERROR_BIT");
+            std::puts("\nfillBuffer error: ERROR_BIT");
             break;
         }
         Protocol::IC_VIDEO_DATA(printerStream, buffer);
         count += buffer.size();
-        std::print("\033[2K\rFilling: {}", count);
+        std::printf("\033[2K\rFilling: %lu", count);
         std::fflush(stdout);
     }
-    std::println();
+    std::putchar('\n');
     return count;
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::println("Usage: {} printerdev", argv[0]);
+        std::printf("Usage: %s printerdev\n", argv[0]);
         return 1;
     }
     std::fstream printerStream(argv[1], std::ios_base::in | std::ios_base::out | std::ios_base::binary);
     if (!printerStream.is_open()) {
-        std::println("Failed to open printer stream");
+        std::puts("Failed to open printer stream");
         return 1;
     }
 
@@ -64,17 +63,17 @@ int main(int argc, char* argv[]) {
 
     Protocol::ExtendedStatus status = Protocol::PC_GET_EXTENDED_STATUS(printerStream);
     if (status.PaperAvailableBits != 0) {
-        std::println("Video buffer size detection is not available: remove paper first");
+        std::puts("Video buffer size detection is not available: remove paper first");
         return 0;
     }
 
     if ((status.Basic & Protocol::BasicStatus::IM_DATA_BUSY) != 0) {
-        std::println("Video buffer size detection error: IM_DATA_BUSY");
+        std::puts("Video buffer size detection error: IM_DATA_BUSY");
         return 1;
     }
 
     assert(Protocol::PC_RESERVE_UNIT(printerStream) == 0);
-    std::println("Unit reserved");
+    std::puts("Unit reserved");
 
     Protocol::PCR_CLEAR_ERROR(printerStream);
     Protocol::PCR_DISCARD_DATA(printerStream);
@@ -98,16 +97,16 @@ int main(int argc, char* argv[]) {
     };
     Protocol::IC_BEGIN_PAGE(printerStream, dummyParams);
 
-    std::println("Filling video buffer: pass 1...");
+    std::puts("Filling video buffer: pass 1...");
     const std::size_t batchSize = 6144;
     const std::size_t thresh = 16 * 1024;
     std::size_t buffSize = fillBuffer(printerStream, batchSize);
     assert(buffSize > thresh);
 
-    std::println("Filling video buffer: pass 2...");
+    std::puts("Filling video buffer: pass 2...");
     Protocol::PCR_DISCARD_DATA(printerStream);
     buffSize = fillBuffer(printerStream, batchSize, buffSize - thresh);
 
-    std::println("Video buffer size: {}", buffSize);
+    std::printf("Video buffer size: %lu\n", buffSize);
     return 0;
 }

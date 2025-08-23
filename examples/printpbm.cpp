@@ -7,8 +7,8 @@
 #include "libcapt/Protocol/ReprintStatus.hpp"
 #include <cassert>
 #include <csignal>
+#include <cstdio>
 #include <iostream>
-#include <print>
 #include <fstream>
 #include <stdexcept>
 #include <stop_token>
@@ -87,34 +87,34 @@ static Protocol::ExtendedStatus waitReady(std::stop_token stopToken, CaptPrinter
         return status;
     }
     while (!status.Ready() && !stopToken.stop_requested()) {
-        std::print("\033[2K\r");
+        std::printf("\033[2K\r");
         if ((status.Engine & Protocol::EngineReadyStatus::DOOR_OPEN) != 0) {
-            std::print("Not ready: DOOR_OPEN");
+            std::printf("Not ready: DOOR_OPEN");
         } else if ((status.Engine & Protocol::EngineReadyStatus::NO_CARTRIDGE) != 0) {
-            std::print("Not ready: NO_CARTRIDGE");
+            std::printf("Not ready: NO_CARTRIDGE");
         } else if ((status.Engine & Protocol::EngineReadyStatus::WAITING) != 0) {
-            std::print("Not ready: WAITING");
+            std::printf("Not ready: WAITING");
         } else if ((status.Engine & Protocol::EngineReadyStatus::TEST_PRINTING) != 0) {
-            std::print("Not ready: TEST_PRINTING");
+            std::printf("Not ready: TEST_PRINTING");
         } else if ((status.Engine & Protocol::EngineReadyStatus::NO_PRINT_PAPER) != 0) {
-            std::print("Not ready: NO_PRINT_PAPER");
+            std::printf("Not ready: NO_PRINT_PAPER");
         } else if ((status.Engine & Protocol::EngineReadyStatus::JAM) != 0) {
-            std::print("Not ready: JAM");
+            std::printf("Not ready: JAM");
         } else if ((status.Engine & Protocol::EngineReadyStatus::CLEANING) != 0) {
-            std::print("Not ready: CLEANING");
+            std::printf("Not ready: CLEANING");
         } else if ((status.Engine & Protocol::EngineReadyStatus::SERVICE_CALL) != 0) {
             throw std::runtime_error("Unrecoverable error: SERVICE_CALL");
         } else if (status.ClearErrorNeeded()) {
-            std::print("Sending clear error...");
+            std::printf("Sending clear error...");
             printer.ClearError(&status);
         } else {
-            std::print("Not ready: unknown error");
+            std::printf("Not ready: unknown error");
             break;
         }
         std::this_thread::sleep_for(1s);
         status = printer.GetStatus();
     }
-    std::println();
+    std::putchar('\n');
     return status;
 }
 
@@ -127,7 +127,7 @@ static void prepareBeforePrint(std::stop_token stopToken, CaptPrinter& printer, 
         assert(status.Ready());
         if (!status.Online() || status.Start != page) {
             if (!printer.GoOnline(page)) {
-                std::println("Failed to go online, retrying...");
+                std::puts("Failed to go online, retrying...");
                 std::this_thread::sleep_for(1s);
                 continue;
             }
@@ -146,9 +146,9 @@ static bool writePage(std::stop_token stopToken, CaptPrinter& printer, Utility::
             return true;
         }
         if (reprint != Protocol::ReprintStatus::None) {
-            std::println("Retrying page {}...", p.PageNumber);
+            std::printf("Retrying page %u...\n", p.PageNumber);
         } else {
-            std::println("Writing page {}...", p.PageNumber);
+            std::printf("Writing page %u...\n", p.PageNumber);
         }
         if (printer.WriteVideoData(p.Params, p)) {
             if (prev && reprint == Protocol::ReprintStatus::Prev) {
@@ -195,23 +195,23 @@ std::stop_source stopSrc;
 int main(int argc, char* argv[]) {
     std::setbuf(stdout, nullptr);
     if (argc != 3) {
-        std::println("Usage: {} printerdev pbmfile", argv[0]);
+        std::printf("Usage: %s printerdev pbmfile\n", argv[0]);
         return 1;
     }
     std::fstream printerStream(argv[1], std::ios_base::in | std::ios_base::out | std::ios_base::binary);
     if (!printerStream.is_open()) {
-        std::println("Failed to open printer stream");
+        std::puts("Failed to open printer stream");
         return 1;
     }
 
     std::fstream pbmStream(argv[2], std::ios_base::in | std::ios_base::binary);
     if (!pbmStream.is_open()) {
-        std::println("Failed to open PBM stream");
+        std::puts("Failed to open PBM stream");
         return 1;
     }
 
     std::signal(SIGINT, +[](int) {
-        std::println("Stopping...");
+        std::puts("Stopping...");
         stopSrc.request_stop();
     });
     std::stop_token stopToken = stopSrc.get_token();
@@ -233,7 +233,7 @@ int main(int argc, char* argv[]) {
         Utility::BufferedPage currPage(page, *params, &ss);
 
         if (!writePage(stopToken, printer, currPage, page == 0 ? nullptr : &prevPage)) {
-            std::println("Error: WritePage failed");
+            std::puts("Error: WritePage failed");
             return 1;
         }
         prevPage = std::move(currPage);
@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (page != 0 && !waitLastPage(stopToken, printer, prevPage)) {
-        std::println("Error: waitLastPage failed");
+        std::puts("Error: waitLastPage failed");
         return 1;
     }
 
