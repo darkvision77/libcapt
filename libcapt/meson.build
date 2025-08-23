@@ -43,15 +43,19 @@ headers = files(
     'UnexpectedBehaviourError.hpp',
 )
 
+static_subproject = get_option('default_library') == 'static' and meson.is_subproject()
+
 include = include_directories('.')
-install_headers(headers, preserve_path: true, subdir: 'libcapt')
+if not static_subproject
+    install_headers(headers, preserve_path: true, subdir: 'libcapt')
+endif
 
 libcapt = library(
     'libcapt',
     sources,
     include_directories: include,
     name_prefix: '',
-    install: true,
+    install: not static_subproject,
 )
 
 libcapt_dep = declare_dependency(
