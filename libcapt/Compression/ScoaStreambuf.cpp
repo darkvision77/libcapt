@@ -107,7 +107,7 @@ namespace Capt::Compression {
                     vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 }
                 while (rawData.size() >= 8) {
-                    std::size_t count = std::min(rawData.size(), 255ul);
+                    std::size_t count = std::min(rawData.size(), 255uz);
                     vsize += ScoaCmd::CopyThenRawLong(buffer, 0, rawData.subspan(0, count));
                     rawData = rawData.subspan(count);
                 }
