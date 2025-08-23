@@ -7,7 +7,7 @@ tests = [
     'ProtocolTest',
 ]
 
-gtest_dep = dependency('gtest', main: true)
+gtest_dep = dependency('gtest_main')
 gmock_dep = dependency('gmock')
 
 foreach t : tests
