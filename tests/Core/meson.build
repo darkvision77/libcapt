@@ -17,5 +17,5 @@ foreach t : tests
         dependencies: [libcapt_dep, gtest_dep, gmock_dep],
         install: false,
     )
-    test(t, exe, protocol: 'gtest', suite: ['general', 'core'])
+    test(t, exe, protocol: 'gtest', suite: ['core'])
 endforeach
