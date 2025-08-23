@@ -1,11 +1,10 @@
-#include "CaptPrinter.hpp"
+#include "BasicCaptPrinter.hpp"
 #include "UnexpectedBehaviourError.hpp"
 #include "Protocol/Enums.hpp"
 #include "Protocol/ExtendedStatus.hpp"
 #include "Protocol/PageParams.hpp"
 #include "Protocol/Protocol.hpp"
 #include <iomanip>
-#include <mutex>
 #include <cassert>
 #include <sstream>
 #include <vector>
@@ -20,42 +19,29 @@ namespace Capt {
         }
     }
 
-    CaptPrinter::CaptPrinter(std::iostream& stream) noexcept : stream(stream), status(Protocol::ExtendedStatus()) {}
+    BasicCaptPrinter::BasicCaptPrinter(std::iostream& stream) noexcept : stream(stream) {}
 
-    Protocol::ExtendedStatus CaptPrinter::updateStatus() {
-        Protocol::ExtendedStatus ex = Protocol::PC_GET_EXTENDED_STATUS(this->stream);
-        this->status.store(ex);
-        return ex;
+    Protocol::ExtendedStatus BasicCaptPrinter::GetStatus() {
+        return Protocol::PC_GET_EXTENDED_STATUS(this->stream);
     }
 
-    Protocol::ExtendedStatus CaptPrinter::GetStatus() {
-        std::unique_lock lock(this->streamlock, std::defer_lock);
-        if (lock.try_lock()) {
-            return this->updateStatus();
-        }
-        return this->status.load();
-    }
-
-    Protocol::PrinterInfo CaptPrinter::GetPrinterInfo() {
+    Protocol::PrinterInfo BasicCaptPrinter::GetPrinterInfo() {
         if (!this->cachedInfo) {
-            std::unique_lock lock(this->streamlock);
             this->cachedInfo = Protocol::PC_GET_PRINTER_INFO(this->stream);
         }
         return *this->cachedInfo;
     }
 
-    void CaptPrinter::ReserveUnit() {
-        std::unique_lock lock(this->streamlock);
+    void BasicCaptPrinter::ReserveUnit() {
         CHECK_RETCODE(Protocol::PC_RESERVE_UNIT(this->stream));
-        Protocol::ExtendedStatus ex = this->updateStatus();
+        Protocol::ExtendedStatus ex = this->GetStatus();
         if (!ex.UnitReserved()) {
             throw UnexpectedBehaviourError("failed to reserve unit");
         }
     }
 
-    void CaptPrinter::ClearError(const Protocol::ExtendedStatus* status) {
-        std::unique_lock lock(this->streamlock);
-        Protocol::ExtendedStatus ex = status == nullptr ? this->updateStatus() : *status;
+    void BasicCaptPrinter::ClearError(const Protocol::ExtendedStatus* status) {
+        Protocol::ExtendedStatus ex = status == nullptr ? this->GetStatus() : *status;
         assert(ex.UnitReserved());
         CHECK_RETCODE(Protocol::PCR_CLEAR_ERROR(this->stream));
         CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
@@ -67,25 +53,22 @@ namespace Capt {
         }
     }
 
-    bool CaptPrinter::GoOnline(unsigned page) {
-        std::unique_lock lock(this->streamlock);
+    bool BasicCaptPrinter::GoOnline(unsigned page) {
         CHECK_RETCODE(Protocol::PCR_GO_ONLINE(this->stream, page));
-        Protocol::ExtendedStatus ex = this->updateStatus();
+        Protocol::ExtendedStatus ex = this->GetStatus();
         return ex.Online();
     }
 
-    void CaptPrinter::Cleaning() {
-        std::unique_lock lock(this->streamlock);
+    void BasicCaptPrinter::Cleaning() {
         CHECK_RETCODE(Protocol::PCR_CLEANING(this->stream));
     }
 
-    bool CaptPrinter::WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
+    bool BasicCaptPrinter::WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
         if (blockSize == 0) {
             blockSize = this->GetPrinterInfo().BlockSize;
         }
         assert((blockSize + 4) <= UINT16_MAX);
 
-        std::unique_lock lock(this->streamlock);
         Protocol::IC_BEGIN_PAGE(this->stream, params);
         Protocol::IC_BEGIN_DATA(this->stream);
         std::vector<uint8_t> buffer(blockSize);
@@ -112,23 +95,21 @@ namespace Capt {
         return true;
     }
 
-    void CaptPrinter::GoOffline() {
-        std::unique_lock lock(this->streamlock);
+    void BasicCaptPrinter::GoOffline() {
         CHECK_RETCODE(Protocol::PCR_GO_OFFLINE(this->stream));
-        Protocol::ExtendedStatus ex = this->updateStatus();
+        Protocol::ExtendedStatus ex = this->GetStatus();
         if (ex.Online()) {
             throw UnexpectedBehaviourError("failed to offline");
         }
     }
 
-    void CaptPrinter::ReleaseUnit() {
-        std::unique_lock lock(this->streamlock);
-        Protocol::ExtendedStatus ex = this->updateStatus();
+    void BasicCaptPrinter::ReleaseUnit() {
+        Protocol::ExtendedStatus ex = this->GetStatus();
         if (!ex.UnitReserved()) {
             return;
         }
         CHECK_RETCODE(Protocol::PCR_RELEASE_UNIT(this->stream));
-        ex = this->updateStatus();
+        ex = this->GetStatus();
         if (ex.UnitReserved()) {
             throw UnexpectedBehaviourError("failed to reserve unit");
         }

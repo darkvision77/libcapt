@@ -1,5 +1,5 @@
 #include "libcapt/Utility/BufferedPage.hpp"
-#include "libcapt/CaptPrinter.hpp"
+#include "libcapt/BasicCaptPrinter.hpp"
 #include "libcapt/Compression/ScoaStreambuf.hpp"
 #include "libcapt/Protocol/Enums.hpp"
 #include "libcapt/Protocol/ExtendedStatus.hpp"
@@ -81,7 +81,7 @@ public:
     }
 };
 
-static Protocol::ExtendedStatus waitReady(std::stop_token stopToken, CaptPrinter& printer) {
+static Protocol::ExtendedStatus waitReady(std::stop_token stopToken, BasicCaptPrinter& printer) {
     Protocol::ExtendedStatus status = printer.GetStatus();
     if (status.Ready()) {
         return status;
@@ -118,7 +118,7 @@ static Protocol::ExtendedStatus waitReady(std::stop_token stopToken, CaptPrinter
     return status;
 }
 
-static void prepareBeforePrint(std::stop_token stopToken, CaptPrinter& printer, unsigned page) {
+static void prepareBeforePrint(std::stop_token stopToken, BasicCaptPrinter& printer, unsigned page) {
     while (true) {
         Protocol::ExtendedStatus status = waitReady(stopToken, printer);
         if (stopToken.stop_requested()) {
@@ -136,7 +136,7 @@ static void prepareBeforePrint(std::stop_token stopToken, CaptPrinter& printer, 
     }
 }
 
-static bool writePage(std::stop_token stopToken, CaptPrinter& printer, Utility::BufferedPage& page, Utility::BufferedPage* prev) {
+static bool writePage(std::stop_token stopToken, BasicCaptPrinter& printer, Utility::BufferedPage& page, Utility::BufferedPage* prev) {
     Protocol::ReprintStatus reprint = Protocol::ReprintStatus::None;
     while (!stopToken.stop_requested()) {
         Utility::BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
@@ -171,7 +171,7 @@ static bool writePage(std::stop_token stopToken, CaptPrinter& printer, Utility::
     return true;
 }
 
-static bool waitLastPage(std::stop_token stopToken, CaptPrinter& printer, Utility::BufferedPage& page) {
+static bool waitLastPage(std::stop_token stopToken, BasicCaptPrinter& printer, Utility::BufferedPage& page) {
     while (!stopToken.stop_requested()) {
         std::this_thread::sleep_for(1s);
         auto status = printer.WaitPrintEnd(stopToken);
@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
     std::stop_token stopToken = stopSrc.get_token();
 
     PbmPageProvider prov(pbmStream);
-    CaptPrinter printer(printerStream);
+    BasicCaptPrinter printer(printerStream);
 
     printer.ReserveUnit();
     printer.ClearError();

@@ -10,7 +10,7 @@ project(
         'cpp_std=c++23',
         'b_lundef=false',
     ],
-    meson_version: '>=1.7.0'
+    meson_version: '>=1.4.0'
 )
 
 subdir('libcapt')

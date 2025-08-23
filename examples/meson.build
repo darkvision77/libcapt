@@ -5,20 +5,20 @@ endif
 executable(
     'printpbm',
     sources: files('printpbm.cpp'),
-    dependencies: [libcapt_dep, atomic_dep],
+    dependencies: [libcapt_dep],
     install: false,
 )
 
 executable(
     'getstatus',
     sources: files('getstatus.cpp'),
-    dependencies: [libcapt_dep, atomic_dep],
+    dependencies: [libcapt_dep],
     install: false,
 )
 
 executable(
     'printerinfo',
     sources: files('printerinfo.cpp'),
-    dependencies: [libcapt_dep, atomic_dep],
+    dependencies: [libcapt_dep],
     install: false,
 )

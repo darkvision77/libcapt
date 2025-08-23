@@ -13,7 +13,7 @@ sources = files(
 
     'Protocol/Protocol.cpp',
 
-    'CaptPrinter.cpp',
+    'BasicCaptPrinter.cpp',
 )
 
 headers = files(
@@ -39,19 +39,16 @@ headers = files(
     'Protocol/ProtocolError.hpp',
     'Protocol/ReprintStatus.hpp',
 
-    'CaptPrinter.hpp',
+    'BasicCaptPrinter.hpp',
     'UnexpectedBehaviourError.hpp',
 )
 
 include = include_directories('.')
 install_headers(headers, preserve_path: true, subdir: 'libcapt')
 
-atomic_dep = dependency('atomic')
-
 libcapt = library(
     'libcapt',
     sources,
-    dependencies: [atomic_dep],
     include_directories: include,
     name_prefix: '',
     install: true,
