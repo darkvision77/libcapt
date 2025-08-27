@@ -14,7 +14,7 @@ namespace Capt {
     inline static void checkRetcode(uint8_t cmdResult, std::string_view paramName) {
         if (cmdResult != 0) {
             std::ostringstream ss;
-            ss << paramName << " returned non-successfull code (0x" << std::hex << std::setfill('0') << std::setw(2) << cmdResult << ')';
+            ss << paramName << " returned non-successfull code (0x" << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(cmdResult) << ')';
             throw UnexpectedBehaviourError(ss.str());
         }
     }
