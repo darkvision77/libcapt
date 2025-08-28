@@ -59,36 +59,41 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    unsigned lineSize;
-    unsigned lines;
-    if (!readPbmHeader(pbmStream, lineSize, lines)) {
-        std::println(stderr, "PBM read failed");
-        return 1;
-    }
-    if (lineSize % 8 != 0) {
-        throw std::runtime_error("PBM width must be a multiple of 8");
-    }
-    lineSize /= 8;
-
-    Compression::ScoaStreambuf scoaStreambuf(*pbmStream.rdbuf(), lineSize, lines);
-
-    Protocol::PageParams pp;
-    pp.ImageLineSize = static_cast<uint16_t>(lineSize);
-    pp.ImageLines = static_cast<uint16_t>(lines);
-    std::println(stderr, "LineSize = {}", pp.ImageLineSize);
-    std::println(stderr, "Lines = {}", pp.ImageLines);
-
-    Protocol::IC_BEGIN_PAGE(outStream, pp);
-    Protocol::IC_BEGIN_DATA(outStream);
-    const std::size_t maxsize = 4096;
-    std::vector<uint8_t> buffer(maxsize);
+    unsigned page = 0;
     while (true) {
-        std::streamsize read = scoaStreambuf.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
-        if (read <= 0) {
+        unsigned lineSize;
+        unsigned lines;
+        if (!readPbmHeader(pbmStream, lineSize, lines)) {
             break;
         }
-        Protocol::IC_VIDEO_DATA(outStream, {buffer.data(), static_cast<std::size_t>(read)});
+        if (lineSize % 8 != 0) {
+            throw std::runtime_error("PBM width must be a multiple of 8");
+        }
+        lineSize /= 8;
+
+        Compression::ScoaStreambuf scoaStreambuf(*pbmStream.rdbuf(), lineSize, lines);
+
+        Protocol::PageParams pp;
+        pp.ImageLineSize = static_cast<uint16_t>(lineSize);
+        pp.ImageLines = static_cast<uint16_t>(lines);
+        std::println(stderr, "Page: {}", page + 1);
+        std::println(stderr, "LineSize = {}", pp.ImageLineSize);
+        std::println(stderr, "Lines = {}", pp.ImageLines);
+
+        Protocol::IC_BEGIN_PAGE(outStream, pp);
+        Protocol::IC_BEGIN_DATA(outStream);
+        const std::size_t maxsize = 4096;
+        std::vector<uint8_t> buffer(maxsize);
+        while (true) {
+            std::streamsize read = scoaStreambuf.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
+            if (read <= 0) {
+                break;
+            }
+            Protocol::IC_VIDEO_DATA(outStream, {buffer.data(), static_cast<std::size_t>(read)});
+        }
+        Protocol::IC_END_PAGE(outStream);
+        page++;
     }
-    Protocol::IC_END_PAGE(outStream);
+    std::println(stderr, "Pages compressed: {}", page);
     return 0;
 }

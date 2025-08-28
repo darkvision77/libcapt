@@ -1,10 +1,10 @@
 #include "libcapt/Core/CaptPacket.hpp"
 #include "libcapt/Compression/Decoder/DecoderStreambuf.hpp"
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <istream>
 #include <print>
-#include <stdexcept>
 #include <streambuf>
 
 using namespace Capt;
@@ -26,15 +26,13 @@ protected:
             return traits_type::to_int_type(*this->gptr());
         }
 
+        assert(this->LineSize != 0 && this->LinesCount != 0);
         while (true) {
             CaptPacket packet;
             if (!(this->reader >> packet)) {
                 return traits_type::eof();
             }
-            if (packet.Opcode == 0xD0A0) {
-                this->LineSize = (static_cast<unsigned>(packet.Payload[31-4]) << 8) | static_cast<unsigned>(packet.Payload[30-4]);
-                this->LinesCount = (static_cast<unsigned>(packet.Payload[33-4]) << 8) | static_cast<unsigned>(packet.Payload[32-4]);
-            } else if (packet.Opcode == 3 || packet.Opcode == 0xD0A2) {
+            if (packet.Opcode == 3 || packet.Opcode == 0xD0A2) {
                 return traits_type::eof();
             } else if (packet.Opcode == 0xC0A0) {
                 this->buffer = packet.Payload;
@@ -48,11 +46,18 @@ protected:
     }
 
 public:
-    VideoDataStreambuf(std::istream& reader) : reader(reader) {
-        this->underflow();
-        if (this->LineSize == 0 || this->LinesCount == 0) {
-            throw std::runtime_error("invalid input");
+    VideoDataStreambuf(std::istream& reader) : reader(reader) {}
+
+    bool ReadHeader() {
+        CaptPacket packet;
+        while (this->reader >> packet) {
+            if (packet.Opcode == 0xD0A0) {
+                this->LineSize = (static_cast<unsigned>(packet.Payload[31-4]) << 8) | static_cast<unsigned>(packet.Payload[30-4]);
+                this->LinesCount = (static_cast<unsigned>(packet.Payload[33-4]) << 8) | static_cast<unsigned>(packet.Payload[32-4]);
+                return true;
+            }
         }
+        return false;
     }
 };
 
@@ -72,29 +77,38 @@ int main(int argc, char* argv[]) {
         std::println(stderr, "Failed to open cmdfile");
         return 1;
     }
-
-    VideoDataStreambuf videoStreambuf(filterInput);
-    Capt::Compression::DecoderStreambuf dec(videoStreambuf, videoStreambuf.LineSize, &cmdout);
-
     std::ofstream outfile(argv[2], std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     if (!outfile.is_open()) {
         std::println(stderr, "Failed to open outfile");
         return 1;
     }
-    outfile << "P4\n" << (videoStreambuf.LineSize * 8) << " " << videoStreambuf.LinesCount << "\n";
 
-    std::size_t decodedSize = 0;
+    unsigned page = 0;
     while (true) {
-        std::vector<char> buffer(videoStreambuf.LineSize);
-        std::streamsize read = dec.sgetn(buffer.data(), buffer.size());
-        if (read == 0) {
+        VideoDataStreambuf videoStreambuf(filterInput);
+        if (!videoStreambuf.ReadHeader()) {
             break;
         }
-        outfile.write(buffer.data(), read);
-        decodedSize += read;
-    }
+        Capt::Compression::DecoderStreambuf dec(videoStreambuf, videoStreambuf.LineSize, &cmdout);
 
-    std::println(stderr, "Decoded size  = {}", decodedSize);
-    std::println(stderr, "Expected size = {}", videoStreambuf.LineSize * videoStreambuf.LinesCount);
+        outfile << "P4\n" << (videoStreambuf.LineSize * 8) << " " << videoStreambuf.LinesCount << "\n";
+
+        std::size_t decodedSize = 0;
+        std::vector<char> buffer(videoStreambuf.LineSize);
+        while (true) {
+            std::streamsize read = dec.sgetn(buffer.data(), buffer.size());
+            if (read == 0) {
+                break;
+            }
+            outfile.write(buffer.data(), read);
+            decodedSize += read;
+        }
+
+        std::println(stderr, "Page: {}", page + 1);
+        std::println(stderr, "Decoded size  = {}", decodedSize);
+        std::println(stderr, "Expected size = {}", videoStreambuf.LineSize * videoStreambuf.LinesCount);
+        page++;
+    }
+    std::println(stderr, "Pages decoded: {}", page);
     return 0;
 }
