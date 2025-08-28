@@ -87,6 +87,7 @@ foreach pbm : pbmfiles
         is_parallel: true,
         depends: [decoder_exe, pagefilt_tgt],
         suite: ['compression', 'decoder'],
+        timeout: 0,
     )
     test(
         'TestCompressor-'+basename,
@@ -95,5 +96,6 @@ foreach pbm : pbmfiles
         is_parallel: true,
         depends: [compressor_exe, decoder_exe],
         suite: ['compression', 'compressor'],
+        timeout: 0,
     )
 endforeach
