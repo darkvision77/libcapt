@@ -1,10 +1,9 @@
 #include "libcapt/Core/CaptPacket.hpp"
 #include "libcapt/Compression/Decoder/DecoderStreambuf.hpp"
 #include <cassert>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <istream>
-#include <print>
 #include <streambuf>
 
 using namespace Capt;
@@ -63,23 +62,23 @@ public:
 
 int main(int argc, char* argv[]) {
     if (argc != 4) {
-        std::println(stderr, "Usage: {} filterout outfile cmdfile", argv[0]);
+        std::fprintf(stderr, "Usage: %s filterout outfile cmdfile\n", argv[0]);
         return 1;
     }
     std::ifstream filterInput(argv[1], std::ios_base::in | std::ios_base::binary);
     if (!filterInput.is_open()) {
-        std::println(stderr, "Failed to open filterout file");
+        std::fputs("Failed to open filterout file\n", stderr);
         return 1;
     }
 
     std::ofstream cmdout(argv[3], std::ios_base::out);
     if (!cmdout.is_open()) {
-        std::println(stderr, "Failed to open cmdfile");
+        std::fputs("Failed to open cmdfile\n", stderr);
         return 1;
     }
     std::ofstream outfile(argv[2], std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     if (!outfile.is_open()) {
-        std::println(stderr, "Failed to open outfile");
+        std::fputs("Failed to open outfile\n", stderr);
         return 1;
     }
 
@@ -104,11 +103,11 @@ int main(int argc, char* argv[]) {
             decodedSize += read;
         }
 
-        std::println(stderr, "Page: {}", page + 1);
-        std::println(stderr, "Decoded size  = {}", decodedSize);
-        std::println(stderr, "Expected size = {}", videoStreambuf.LineSize * videoStreambuf.LinesCount);
+        std::fprintf(stderr, "Page: %u\n", page + 1);
+        std::fprintf(stderr, "Decoded size  = %zu\n", decodedSize);
+        std::fprintf(stderr, "Expected size = %u\n", videoStreambuf.LineSize * videoStreambuf.LinesCount);
         page++;
     }
-    std::println(stderr, "Pages decoded: {}", page);
+    std::fprintf(stderr, "Pages decoded: %u\n", page);
     return 0;
 }

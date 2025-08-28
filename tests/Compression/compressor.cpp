@@ -3,7 +3,6 @@
 #include <cctype>
 #include <fstream>
 #include <istream>
-#include <print>
 #include <stdexcept>
 #include <vector>
 
@@ -43,19 +42,19 @@ static bool readPbmHeader(std::istream& stream, unsigned& width, unsigned& heigh
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::println(stderr, "Usage {} pbmfile outfile", argv[0]);
+        std::fprintf(stderr, "Usage %s pbmfile outfile\n", argv[0]);
         return 1;
     }
 
     std::ifstream pbmStream(argv[1], std::ios_base::in | std::ios_base::binary);
     if (!pbmStream.is_open()) {
-        std::println(stderr, "Failed to open pbmfile");
+        std::fputs("Failed to open pbmfile\n", stderr);
         return 1;
     }
 
     std::ofstream outStream(argv[2], std::ios_base::trunc | std::ios_base::out | std::ios_base::binary);
     if (!outStream.is_open()) {
-        std::println(stderr, "Failed to open outfile");
+        std::fputs("Failed to open outfile\n", stderr);
         return 1;
     }
 
@@ -76,9 +75,9 @@ int main(int argc, char* argv[]) {
         Protocol::PageParams pp;
         pp.ImageLineSize = static_cast<uint16_t>(lineSize);
         pp.ImageLines = static_cast<uint16_t>(lines);
-        std::println(stderr, "Page: {}", page + 1);
-        std::println(stderr, "LineSize = {}", pp.ImageLineSize);
-        std::println(stderr, "Lines = {}", pp.ImageLines);
+        std::fprintf(stderr, "Page: %u\n", page + 1);
+        std::fprintf(stderr, "LineSize = %u\n", pp.ImageLineSize);
+        std::fprintf(stderr, "Lines = %u\n", pp.ImageLines);
 
         Protocol::IC_BEGIN_PAGE(outStream, pp);
         Protocol::IC_BEGIN_DATA(outStream);
@@ -94,6 +93,6 @@ int main(int argc, char* argv[]) {
         Protocol::IC_END_PAGE(outStream);
         page++;
     }
-    std::println(stderr, "Pages compressed: {}", page);
+    std::fprintf(stderr, "Pages compressed: %u\n", page);
     return 0;
 }
