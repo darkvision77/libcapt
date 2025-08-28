@@ -14,6 +14,7 @@ pbmfiles = files(
     'repx-1.pbm',
 )
 
+sh = find_program('sh')
 pdfseparate = find_program('pdfseparate')
 pdfinfo = find_program('pdfinfo')
 pdf2pbm = find_program(meson.project_source_root() / 'scripts/pdf2pbm.sh')
@@ -39,7 +40,7 @@ foreach file : pdffiles
     pdfsep_tgt = custom_target(
         input: file,
         output: outfiles,
-        command: [pdfseparate, '@INPUT@', '@OUTDIR@/@BASENAME@-page%04d.pdf'],
+        command: [sh, '-c', '$0 $@ 2> /dev/null', pdfseparate, '@INPUT@', '@OUTDIR@/@BASENAME@-page%04d.pdf'],
         install: false,
     )
     separatedfiles = pdfsep_tgt.to_list()
