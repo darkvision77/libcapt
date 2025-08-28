@@ -1,0 +1,33 @@
+name: Compression tests
+on: [push, pull_request]
+
+jobs:
+  Ubuntu:
+    name: ubuntu-24.04
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install apt packages
+        run: |
+          sudo apt-get update -y --fix-missing
+          sudo apt-get install -y python3-pip gcc pkg-config ninja-build poppler-utils gdb ghostscript
+
+      - name: Install captfilter deps
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install libpopt0:i386
+
+      - name: Install meson
+        run: sudo pip3 install --upgrade meson
+
+      - name: Configure
+        run: meson setup build -Db_sanitize=address,undefined -Dexamples=disabled -Dtests=disabled -Dcompression_tests=enabled
+
+      - name: Compile
+        run: meson compile -v -C build
+
+      - name: Run compression tests
+        run: meson test --print-errorlogs -C build --suite=compression
