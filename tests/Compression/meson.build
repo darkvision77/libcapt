@@ -23,6 +23,7 @@ foreach pbm : pbmfiles
         input: pbm,
         output: ['@BASENAME@.log', '@BASENAME@.bin'],
         command: [filter, '@INPUT@', '@OUTPUT@'],
+        build_by_default: true,
         install: false,
     )
     test(
