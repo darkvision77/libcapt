@@ -1,4 +1,7 @@
 # libcapt
+[![Core tests](https://github.com/darkvision77/libcapt/actions/workflows/core-tests.yml/badge.svg)](https://github.com/darkvision77/libcapt/actions/workflows/core-tests.yml)
+[![Compression tests](https://github.com/darkvision77/libcapt/actions/workflows/compression-tests.yml/badge.svg)](https://github.com/darkvision77/libcapt/actions/workflows/compression-tests.yml)
+
 Implementation of the Canon CAPT v1 protocol and SCoA compression based on reverse engineering of the original driver.
 
 > [!IMPORTANT]
