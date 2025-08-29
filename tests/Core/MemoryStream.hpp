@@ -4,6 +4,7 @@
 #include <streambuf>
 #include <iostream>
 #include <vector>
+#include <cstdint>
 
 class MemoryStreambuf : public std::streambuf {
 protected:
