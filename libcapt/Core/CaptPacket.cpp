@@ -31,7 +31,7 @@ namespace Capt {
         }
         std::size_t size = 4 + payload.size();
         if (size > UINT16_MAX) {
-            throw std::overflow_error("Packet size overflow");
+            throw std::overflow_error("packet size overflow");
         }
         writeUint16(stream, opcode);
         writeUint16(stream, size);
@@ -45,7 +45,7 @@ namespace Capt {
         }
         std::size_t size = packet.Size();
         if (size > UINT16_MAX) {
-            throw std::overflow_error("Packet size overflow");
+            throw std::overflow_error("packet size overflow");
         }
         writeUint16(stream, packet.Opcode);
         writeUint16(stream, size);

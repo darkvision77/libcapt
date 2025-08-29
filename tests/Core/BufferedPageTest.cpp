@@ -1,10 +1,9 @@
 #include "libcapt/Utility/BufferedPage.hpp"
-#include "gmock/gmock.h"
+#include "libcapt/Protocol/PageParams.hpp"
+#include "MemoryStream.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <ios>
-#include "MemoryStream.hpp"
-#include "libcapt/Protocol/PageParams.hpp"
 
 using namespace Capt;
 

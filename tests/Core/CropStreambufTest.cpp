@@ -1,10 +1,8 @@
 #include "libcapt/Utility/CropStreambuf.hpp"
-#include "gmock/gmock.h"
+#include "MemoryStream.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <ios>
 #include <streambuf>
-#include "MemoryStream.hpp"
 
 using namespace Capt;
 

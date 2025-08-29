@@ -1,7 +1,7 @@
+#include "libcapt/Core/PacketBuilder.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <stdexcept>
-#include "libcapt/Core/PacketBuilder.hpp"
 
 using testing::ElementsAre;
 using namespace Capt;

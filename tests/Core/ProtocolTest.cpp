@@ -1,10 +1,10 @@
 #include "libcapt/Protocol/Protocol.hpp"
 #include "libcapt/Core/CaptPacket.hpp"
 #include "libcapt/Protocol/Enums.hpp"
-#include "MemoryStream.hpp"
 #include "libcapt/Protocol/ExtendedStatus.hpp"
 #include "libcapt/Protocol/PrinterInfo.hpp"
 #include "libcapt/Protocol/ProtocolError.hpp"
+#include "MemoryStream.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <stdexcept>

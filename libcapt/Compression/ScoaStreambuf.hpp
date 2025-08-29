@@ -16,10 +16,7 @@ namespace Capt::Compression {
         std::size_t videoSize;
 
         std::size_t encodeLine(std::span<const uint8_t> line);
-
-    protected:
         int_type underflow() override;
-
     public:
         explicit ScoaStreambuf(std::streambuf& rasterStream, unsigned lineSize, unsigned lines);
     };

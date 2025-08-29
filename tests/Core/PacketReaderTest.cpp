@@ -1,7 +1,6 @@
-#include "gmock/gmock.h"
+#include "libcapt/Core/PacketReader.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "libcapt/Core/PacketReader.hpp"
 
 using namespace Capt;
 

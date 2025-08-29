@@ -5,7 +5,7 @@ namespace Capt {
 
     uint8_t PacketReader::ReadByte() {
         if (this->iter == this->packet.Payload.end()) {
-            throw std::out_of_range("Packet payload EOF");
+            throw std::out_of_range("packet payload EOF");
         }
         uint8_t value = *this->iter;
         this->iter++;
@@ -29,7 +29,7 @@ namespace Capt {
 
     std::span<const uint8_t> PacketReader::ReadBytes(std::size_t count) {
         if ((this->iter + count) > this->packet.Payload.end()) {
-            throw std::out_of_range("Packet payload EOF");
+            throw std::out_of_range("packet payload EOF");
         }
         this->iter += count;
         return {this->iter - count, this->iter};

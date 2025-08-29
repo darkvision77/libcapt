@@ -26,7 +26,7 @@ namespace Capt {
 
     void PacketBuilder::AppendBytes(std::span<const uint8_t> data) {
         if ((this->Packet.Size() + data.size()) > UINT16_MAX) {
-            throw std::overflow_error("Packet size overflow");
+            throw std::overflow_error("packet size overflow");
         }
         this->Packet.Payload.insert(this->Packet.Payload.end(), data.begin(), data.end());
     }

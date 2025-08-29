@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "libcapt/Core/CaptPacket.hpp"
 #include "MemoryStream.hpp"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using testing::ElementsAreArray;
 using testing::ElementsAre;
