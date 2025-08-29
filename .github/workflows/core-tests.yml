@@ -97,6 +97,7 @@ jobs:
           - armv7
           - aarch64
           - riscv64
+          - ppc64le
         branch:
           - v3.22
     defaults:
