@@ -201,10 +201,9 @@ namespace Capt::Compression {
         }
 
         std::streamsize read = this->rasterStream->sgetn(reinterpret_cast<char*>(this->lineBuffer.data()), this->lineBuffer.size());
-        if (read <= 0) {
+        if (read < static_cast<std::streamsize>(this->lineBuffer.size())) {
             return traits_type::eof();
         }
-        assert(static_cast<std::size_t>(read) == this->lineBuffer.size());
 
         this->buffer.clear();
         this->state.ProcessLine(this->lineBuffer);
