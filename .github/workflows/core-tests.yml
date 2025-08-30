@@ -55,6 +55,7 @@ jobs:
       - name: Run Debian container
         run: |
           docker run --rm -v $(pwd):/workspace -w /workspace debian:${{ matrix.os-version }}-slim /bin/bash -c "
+          set -eou pipefail
           apt-get update -y --fix-missing
           apt-get install -y python3-pip gcc libgtest-dev libgmock-dev pkg-config ninja-build
           pip3 install --break-system-packages --upgrade meson
@@ -70,20 +71,29 @@ jobs:
       matrix:
         release:
           - "14.3"
+    defaults:
+      run:
+        shell: freebsd {0}
     name: FreeBSD ${{ matrix.release }}-RELEASE
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Run FreeBSD VM
         uses: vmactions/freebsd-vm@v1
         with:
           release: ${{ matrix.release }}
           prepare: pkg install -y meson googletest pkgconf llvm-devel
-          run: |
-            meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled -Dcpp_args="-fexperimental-library"
-            meson compile -v -C build
-            meson test --print-errorlogs -C build --suite=core
+
+      - name: Configure
+        run: cd $GITHUB_WORKSPACE && meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled -Dcpp_args="-fexperimental-library"
+
+      - name: Compile
+        run: cd $GITHUB_WORKSPACE && meson compile -v -C build
+
+      - name: Run tests
+        run: cd $GITHUB_WORKSPACE && meson test --print-errorlogs -C build --suite=core
 
   Alpine:
     needs: Ubuntu
