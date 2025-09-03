@@ -56,6 +56,7 @@ jobs:
         run: |
           docker run --rm -v $(pwd):/workspace -w /workspace debian:${{ matrix.os-version }}-slim /bin/bash -c "
           set -eou pipefail
+          export GITHUB_ACTIONS=true
           apt-get update -y --fix-missing
           apt-get install -y python3-pip gcc libgtest-dev libgmock-dev pkg-config ninja-build
           pip3 install --break-system-packages --upgrade meson
@@ -85,6 +86,7 @@ jobs:
         with:
           release: ${{ matrix.release }}
           prepare: pkg install -y meson googletest pkgconf llvm-devel
+          envs: 'GITHUB_ACTIONS'
 
       - name: Configure
         run: cd $GITHUB_WORKSPACE && meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled -Dcpp_args="-fexperimental-library"
