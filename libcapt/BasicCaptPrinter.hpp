@@ -25,7 +25,7 @@ namespace Capt {
         virtual void ReserveUnit();
         virtual void ClearError(const Protocol::ExtendedStatus* status = nullptr);
         virtual bool GoOnline(unsigned page);
-        virtual void Cleaning();
+        virtual bool Cleaning();
 
         // If blockSize is zero, it will be taken from PrinterInfo
         virtual bool WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0);

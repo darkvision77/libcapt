@@ -59,8 +59,8 @@ namespace Capt {
         return ex.Online();
     }
 
-    void BasicCaptPrinter::Cleaning() {
-        CHECK_RETCODE(Protocol::PCR_CLEANING(this->stream));
+    bool BasicCaptPrinter::Cleaning() {
+        return Protocol::PCR_CLEANING(this->stream) == 0;
     }
 
     bool BasicCaptPrinter::WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize) {
