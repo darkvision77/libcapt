@@ -111,7 +111,7 @@ namespace Capt {
         CHECK_RETCODE(Protocol::PCR_RELEASE_UNIT(this->stream));
         ex = this->GetStatus();
         if (ex.UnitReserved()) {
-            throw UnexpectedBehaviourError("failed to reserve unit");
+            throw UnexpectedBehaviourError("failed to release unit");
         }
     }
 }
