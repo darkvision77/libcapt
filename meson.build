@@ -11,8 +11,15 @@ project(
         'cpp_std=c++23',
         'b_lundef=false',
     ],
-    meson_version: '>=1.4.0',
+    meson_version: '>=1.5.0',
 )
+
+cpp = meson.get_compiler('cpp')
+
+cpp.compiles('''
+#include <stop_token>
+int main() { std::stop_token token; return 0; }
+''', name: 'std::stop_token support', required: true)
 
 subdir('libcapt')
 subdir('tests')
