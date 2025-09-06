@@ -80,6 +80,10 @@ namespace Capt::Protocol {
                 || (this->Engine & EngineReadyStatus::SERVICE_CALL) != 0;
         }
 
+        constexpr bool ServiceCall() const noexcept {
+            return (this->Engine & EngineReadyStatus::SERVICE_CALL) != 0;
+        }
+
         constexpr bool FatalError() const noexcept {
             return (this->Basic & BasicStatus::ERROR_BIT) != 0
                 || (this->Basic & BasicStatus::CMD_BUSY) != 0
