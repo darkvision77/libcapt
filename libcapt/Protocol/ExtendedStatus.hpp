@@ -8,6 +8,7 @@
 namespace Capt::Protocol {
     struct ExtendedStatus {
         BasicStatus Basic;
+        uint8_t Changed;
         AuxStatus Aux;
         ControllerStatus Controller;
         uint8_t PaperAvailableBits;

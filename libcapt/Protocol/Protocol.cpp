@@ -78,7 +78,7 @@ namespace Capt::Protocol {
             ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(result.Basic);
             throw ProtocolError(ss.str());
         }
-        reader.ReadByte(); // param_1 + 0x279
+        result.Changed = reader.ReadByte();
         result.Aux = static_cast<AuxStatus>(reader.ReadByte());
         result.Controller = static_cast<ControllerStatus>(reader.ReadByte());
         result.PaperAvailableBits = reader.ReadByte();
