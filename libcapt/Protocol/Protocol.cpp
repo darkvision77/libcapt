@@ -69,7 +69,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, 0xA0A0);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
 
         ExtendedStatus result;
         result.Basic = static_cast<BasicStatus>(reader.ReadByte());
@@ -97,7 +97,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, 0xA1A1);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
 
         PrinterInfo result;
         reader.ReadByte(); // local_15
@@ -118,7 +118,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, 0xE0A0);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
         BasicStatus status = static_cast<BasicStatus>(reader.ReadByte());
         uint8_t ch = reader.ReadByte();
         if (changed != nullptr) {
@@ -138,7 +138,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, 0xE0A5);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
         uint8_t err = reader.ReadByte();
         return err;
     }
@@ -154,7 +154,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, 0xE0AD);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
         uint8_t err = reader.ReadByte();
         // there is one more byte ignored by the original software
         return err;
@@ -166,7 +166,7 @@ namespace Capt::Protocol {
         CaptPacket packet;
         stream >> packet;
         checkOpcode(packet.Opcode, opcode);
-        PacketReader reader = PacketReader(packet);
+        PacketReader reader(packet.Payload);
         uint8_t err = reader.ReadByte();
         return err;
     }
