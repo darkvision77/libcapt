@@ -21,34 +21,34 @@ namespace Capt::Protocol {
     }
 
     void IC_BEGIN_PAGE(std::ostream& stream, const PageParams& params) {
-        PacketBuilder builder(0xD0A0);
-        builder.AppendUint16(0); // const uint16
-        builder.AppendUint16(0x03fc); // TargetModel
-        builder.AppendByte(params.PaperSize);
-        builder.AppendByte(0); // const byte
-        builder.AppendByte(0); // InputSlot = auto
-        builder.AppendByte(0); // const byte
-        builder.AppendByte(params.TonerDensity);
-        builder.AppendByte(params.TonerDensity);
-        builder.AppendByte(params.TonerDensity);
-        builder.AppendByte(params.TonerDensity);
-        builder.AppendByte(params.Mode);
-        builder.AppendByte(params.Resolution);
-        builder.AppendByte(3); // const byte
-        builder.AppendByte(1); // const byte
-        builder.AppendByte(1); // const byte
-        builder.AppendByte(1); // const byte
-        builder.AppendByte(params.SmoothEnable ? 2 : 0);
-        builder.AppendByte(params.TonerSaving ? 1 : 0);
-        builder.AppendByte(0); // const byte
-        builder.AppendByte(0); // const byte
-        builder.AppendUint16(params.MarginLeft);
-        builder.AppendUint16(params.MarginTop);
-        builder.AppendUint16(params.ImageLineSize);
-        builder.AppendUint16(params.ImageLines);
-        builder.AppendUint16(params.PaperWidth);
-        builder.AppendUint16(params.PaperHeight);
-        stream << builder.Packet << std::flush;
+        PacketBuilder()
+            .AppendUint16(0) // const uint16
+            .AppendUint16(0x03fc) // TargetModel
+            .AppendByte(params.PaperSize)
+            .AppendByte(0) // const byte
+            .AppendByte(0) // InputSlot = auto
+            .AppendByte(0) // const byte
+            .AppendByte(params.TonerDensity)
+            .AppendByte(params.TonerDensity)
+            .AppendByte(params.TonerDensity)
+            .AppendByte(params.TonerDensity)
+            .AppendByte(params.Mode)
+            .AppendByte(params.Resolution)
+            .AppendByte(3) // const byte
+            .AppendByte(1) // const byte
+            .AppendByte(1) // const byte
+            .AppendByte(1) // const byte
+            .AppendByte(params.SmoothEnable ? 2 : 0)
+            .AppendByte(params.TonerSaving ? 1 : 0)
+            .AppendByte(0) // const byte
+            .AppendByte(0) // const byte
+            .AppendUint16(params.MarginLeft)
+            .AppendUint16(params.MarginTop)
+            .AppendUint16(params.ImageLineSize)
+            .AppendUint16(params.ImageLines)
+            .AppendUint16(params.PaperWidth)
+            .AppendUint16(params.PaperHeight)
+            .WriteTo(stream, 0xD0A0) << std::flush;
     }
 
     void IC_BEGIN_DATA(std::ostream& stream) {
@@ -128,32 +128,32 @@ namespace Capt::Protocol {
     }
 
     uint8_t PCR_GO_ONLINE(std::iostream& stream, uint16_t pageNumber) {
-        PacketBuilder builder(0xE0A5);
-        builder.AppendUint32(0xadeadbee);
-        builder.AppendUint16(pageNumber);
-        builder.AppendByte(0); // const byte
-        builder.AppendByte(0); // const byte
-        stream << builder.Packet << std::flush;
+        PacketBuilder()
+            .AppendUint32(0xadeadbee)
+            .AppendUint16(pageNumber)
+            .AppendByte(0) // const byte
+            .AppendByte(0) // const byte
+            .WriteTo(stream, 0xE0A5) << std::flush;
 
         CaptPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, builder.Packet.Opcode);
+        checkOpcode(packet.Opcode, 0xE0A5);
         PacketReader reader = PacketReader(packet);
         uint8_t err = reader.ReadByte();
         return err;
     }
 
     uint8_t PCR_CLEANING(std::iostream& stream) {
-        PacketBuilder builder(0xE0AD);
-        builder.AppendUint32(0xadeadbee);
-        builder.AppendUint16(1); // const byte
-        builder.AppendByte(0); // const byte
-        builder.AppendByte(0); // const byte
-        stream << builder.Packet << std::flush;
+        PacketBuilder()
+            .AppendUint32(0xadeadbee)
+            .AppendUint16(1) // const byte
+            .AppendByte(0) // const byte
+            .AppendByte(0) // const byte
+            .WriteTo(stream, 0xE0AD) << std::flush;
 
         CaptPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, builder.Packet.Opcode);
+        checkOpcode(packet.Opcode, 0xE0AD);
         PacketReader reader = PacketReader(packet);
         uint8_t err = reader.ReadByte();
         // there is one more byte ignored by the original software

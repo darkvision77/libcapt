@@ -1,21 +1,59 @@
 #ifndef _LIBCAPT_CORE_PACKET_BUILDER_HPP_
 #define _LIBCAPT_CORE_PACKET_BUILDER_HPP_
 
+#include <algorithm>
 #include <cstdint>
 #include <span>
 #include "CaptPacket.hpp"
 
 namespace Capt {
-    class PacketBuilder {
-    public:
-        CaptPacket Packet;
+    template<std::size_t Size = 0>
+    struct PacketBuilder {
+        static_assert((Size + 4) <= UINT16_MAX, "packet size overflow");
 
-        explicit PacketBuilder(uint16_t opcode) noexcept;
+        std::array<uint8_t, Size> Payload;
 
-        void AppendByte(uint8_t value);
-        void AppendUint16(uint16_t value);
-        void AppendUint32(uint32_t value);
-        void AppendBytes(std::span<const uint8_t> data);
+        constexpr auto AppendByte(uint8_t value) noexcept {
+            PacketBuilder<Size + 1> res;
+            std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
+            res.Payload[Size] = value;
+            return res;
+        }
+
+        constexpr auto AppendUint16(uint16_t value) noexcept {
+            PacketBuilder<Size + 2> res;
+            std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
+            res.Payload[Size] = value & 0xff;
+            res.Payload[Size + 1] = (value >> 8) & 0xff;
+            return res;
+        }
+
+        constexpr auto AppendUint32(uint32_t value) noexcept {
+            PacketBuilder<Size + 4> res;
+            std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
+            res.Payload[Size] = value & 0xff;
+            res.Payload[Size + 1] = (value >> 8) & 0xff;
+            res.Payload[Size + 2] = (value >> 16) & 0xff;
+            res.Payload[Size + 3] = (value >> 24) & 0xff;
+            return res;
+        }
+
+        template<std::size_t DataSize>
+        constexpr auto AppendBytes(std::span<const uint8_t, DataSize> data) noexcept {
+            PacketBuilder<Size + data.size()> res;
+            std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
+            std::copy_n(data.begin(), data.size(), res.Payload.begin() + Size);
+            return res;
+        }
+
+        template<std::size_t DataSize>
+        constexpr auto AppendBytes(const std::array<uint8_t, DataSize>& data) noexcept {
+            return this->AppendBytes(std::span<const uint8_t, DataSize>(data));
+        }
+
+        inline std::ostream& WriteTo(std::ostream& stream, uint16_t opcode) const {
+            return CaptPacket::WriteTo(stream, opcode, this->Payload);
+        }
     };
 }
 

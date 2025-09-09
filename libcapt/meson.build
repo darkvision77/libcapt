@@ -5,7 +5,6 @@ sources = files(
     'Compression/ScoaStreambuf.cpp',
 
     'Core/CaptPacket.cpp',
-    'Core/PacketBuilder.cpp',
     'Core/PacketReader.cpp',
 
     'Utility/BufferedPage.cpp',
