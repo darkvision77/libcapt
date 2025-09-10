@@ -8,7 +8,7 @@ namespace Capt {
     class PacketReader {
     private:
         std::span<const uint8_t> payload;
-        std::span<const uint8_t>::const_iterator iter;
+        std::span<const uint8_t>::iterator iter;
     public:
         explicit PacketReader(std::span<const uint8_t> payload) noexcept;
 

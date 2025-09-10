@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 namespace Capt {
-    PacketReader::PacketReader(std::span<const uint8_t> payload) noexcept : payload(payload), iter(payload.cbegin()) {}
+    PacketReader::PacketReader(std::span<const uint8_t> payload) noexcept : payload(payload), iter(payload.begin()) {}
 
     uint8_t PacketReader::ReadByte() {
         if (this->iter == this->payload.end()) {
