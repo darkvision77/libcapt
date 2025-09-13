@@ -182,8 +182,8 @@ namespace Capt::Compression {
             }
         }
 
-        std::ostringstream ss("unknown command: 0x");
-        ss << std::hex << std::setfill('0') << std::setw(2) << cmd;
+        std::ostringstream ss;
+        ss << "unknown command: 0x" << std::hex << std::setfill('0') << std::setw(2) << cmd;
         throw DecoderError(ss.str());
     }
 

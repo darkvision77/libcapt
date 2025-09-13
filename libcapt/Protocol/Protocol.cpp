@@ -13,7 +13,8 @@
 namespace Capt::Protocol {
     inline static void checkOpcode(uint16_t actual, uint16_t expected) {
         if (actual != expected) {
-            std::ostringstream ss("unexpected response opcode: 0x");
+            std::ostringstream ss;
+            ss << "unexpected response opcode: 0x";
             ss << std::hex << std::setfill('0') << std::uppercase << std::setw(4) << actual << std::nouppercase;
             ss << " (expected 0x" << std::uppercase << std::setw(4) << expected << ')';
             throw ProtocolError(ss.str());
@@ -74,7 +75,8 @@ namespace Capt::Protocol {
         ExtendedStatus result;
         result.Basic = static_cast<BasicStatus>(reader.ReadByte());
         if ((result.Basic & BasicStatus::ERROR_BIT) != 0) {
-            std::ostringstream ss("PC_GET_EXTENDED_STATUS returned error: 0x");
+            std::ostringstream ss;
+            ss << "PC_GET_EXTENDED_STATUS returned error: 0x";
             ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(result.Basic);
             throw ProtocolError(ss.str());
         }
