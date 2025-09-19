@@ -1,7 +1,6 @@
 #ifndef _LIBCAPT_PROTOCOL_PAGE_PARAMS_HPP_
 #define _LIBCAPT_PROTOCOL_PAGE_PARAMS_HPP_
 
-#include "Enums.hpp"
 #include <cstdint>
 
 namespace Capt::Protocol {
@@ -9,7 +8,7 @@ namespace Capt::Protocol {
         uint8_t PaperSize;
         uint8_t TonerDensity;
         uint8_t Mode;
-        ResolutionIdx Resolution;
+        uint8_t Resolution;
         bool SmoothEnable;
         bool TonerSaving;
         uint16_t MarginLeft;
