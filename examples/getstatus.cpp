@@ -178,6 +178,7 @@ static void printStatus(Protocol::ExtendedStatus ex) {
     std::printf("Printing = %u\n", ex.Printing);
     std::printf("Shipped = %u\n", ex.Shipped);
     std::printf("Printed = %u\n", ex.Printed);
+    std::printf("Paper = 0x%x\n", ex.PaperAvailableBits);
 }
 
 int main(int argc, char* argv[]) {
