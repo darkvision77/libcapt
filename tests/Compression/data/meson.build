@@ -12,6 +12,7 @@ pbmfiles = files(
     'empty.pbm',
     'black-1.pbm',
     'repx-1.pbm',
+    'textA.pbm',
 )
 
 sh = find_program('sh')
