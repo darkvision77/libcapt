@@ -76,6 +76,37 @@ namespace Capt::Compression {
         return vsize;
     }
 
+    std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, unsigned copyCount, unsigned repeatCount, uint8_t repeatByte) {
+        if (repeatCount == 0 && copyCount == 0) {
+            return 0;
+        }
+        std::size_t vsize = 0;
+        if (copyCount <= 7) {
+            while (repeatCount >= 8) {
+                unsigned rep = std::min(repeatCount, 255u);
+                vsize += ScoaCmd::CopyThenRepeatLong(buffer, copyCount, rep, repeatByte);
+                copyCount = 0;
+                repeatCount -= rep;
+            }
+            if (repeatCount >= 2) {
+                vsize += ScoaCmd::CopyThenRepeat(buffer, copyCount, repeatCount, repeatByte);
+            } else if (repeatCount == 1) {
+                vsize += ScoaCmd::CopyThenRaw(buffer, copyCount, {&repeatByte, 1});
+            } else if (copyCount != 0) {
+                vsize += ScoaCmd::CopyShort(buffer, copyCount);
+            }
+        } else {
+            while (copyCount >= 8) {
+                unsigned copy = std::min(copyCount, 248u);
+                copy = copy - (copy % 8);
+                vsize += ScoaCmd::CopyLong(buffer, copy);
+                copyCount -= copy;
+            }
+            return vsize + cmd_CopyThenRepeat(buffer, copyCount, repeatCount, repeatByte);
+        }
+        return vsize;
+    }
+
     std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
         if (repeatCount == 0 && rawData.size() == 0) {
             return 0;
@@ -84,14 +115,14 @@ namespace Capt::Compression {
         if (repeatCount <= 7) {
             if (rawData.size() <= 7) {
                 if (rawData.size() == 0) {
-                    vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
+                    vsize += cmd_CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 } else if (repeatCount == 0) {
                     vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
                 } else {
                     if (repeatCount >= 2) {
                         vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData);
                     } else {
-                        vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
+                        vsize += cmd_CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                         vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
                     }
                 }
@@ -100,7 +131,7 @@ namespace Capt::Compression {
                     vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData.subspan(0, 7));
                     rawData = rawData.subspan(7);
                 } else if (repeatCount != 0) {
-                    vsize += ScoaCmd::CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
+                    vsize += cmd_CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 }
                 while (rawData.size() >= 8) {
                     std::size_t count = std::min(rawData.size(), 255uz);
@@ -118,33 +149,6 @@ namespace Capt::Compression {
                 repeatCount -= count;
             }
             return vsize + cmd_RepeatThenRaw(buffer, repeatCount, repeatByte, rawData);
-        }
-        return vsize;
-    }
-
-    std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, unsigned copyCount, unsigned repeatCount, uint8_t repeatByte) {
-        if (repeatCount == 0 && copyCount == 0) {
-            return 0;
-        }
-        std::size_t vsize = 0;
-        if (copyCount <= 7) {
-            while (repeatCount >= 8) {
-                unsigned rep = std::min(repeatCount, 255u);
-                vsize += ScoaCmd::CopyThenRepeatLong(buffer, copyCount, rep, repeatByte);
-                copyCount = 0;
-                repeatCount -= rep;
-            }
-            if (copyCount != 0 || repeatCount != 0) {
-                vsize += ScoaCmd::CopyThenRepeat(buffer, copyCount, repeatCount, repeatByte);
-            }
-        } else {
-            while (copyCount >= 8) {
-                unsigned copy = std::min(copyCount, 248u);
-                copy = copy - (copy % 8);
-                vsize += ScoaCmd::CopyLong(buffer, copy);
-                copyCount -= copy;
-            }
-            return vsize + cmd_CopyThenRepeat(buffer, copyCount, repeatCount, repeatByte);
         }
         return vsize;
     }
