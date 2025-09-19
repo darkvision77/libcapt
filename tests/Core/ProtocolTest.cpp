@@ -128,7 +128,7 @@ TEST_F(ProtocolTest, IC_END_PAGE) {
 }
 
 TEST_F(ProtocolTest, IC_VIDEO_DATA) {
-    std::vector<uint8_t> buffer{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::vector<uint8_t> buffer = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     Protocol::IC_VIDEO_DATA(stream, buffer);
     ExpectPacket(0xC0A0, buffer);
 }

@@ -7,8 +7,8 @@
 
 using namespace Capt;
 
-TEST(BufferedPage, SeekPos) {
-    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+TEST(BufferedPageTest, SeekPos) {
+    const std::vector<uint8_t> buff = {1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
     Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
@@ -23,8 +23,8 @@ TEST(BufferedPage, SeekPos) {
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
 
-TEST(BufferedPage, SeekOff) {
-    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+TEST(BufferedPageTest, SeekOff) {
+    const std::vector<uint8_t> buff = {1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
     Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
@@ -45,8 +45,8 @@ TEST(BufferedPage, SeekOff) {
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
 
-TEST(BufferedPage, MoveCtor) {
-    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+TEST(BufferedPageTest, MoveCtor) {
+    const std::vector<uint8_t> buff = {1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
     Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
@@ -59,8 +59,8 @@ TEST(BufferedPage, MoveCtor) {
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
 
-TEST(BufferedPage, MoveAssign) {
-    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8};
+TEST(BufferedPageTest, MoveAssign) {
+    const std::vector<uint8_t> buff = {1, 2, 3, 4, 5, 6, 7, 8};
     MemoryStream ms(buff);
     Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 
@@ -74,8 +74,8 @@ TEST(BufferedPage, MoveAssign) {
     ASSERT_THAT(temp, testing::ElementsAreArray(buff));
 }
 
-TEST(BufferedPage, PartRead) {
-    const std::vector<uint8_t> buff{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+TEST(BufferedPageTest, PartRead) {
+    const std::vector<uint8_t> buff = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     MemoryStream ms(buff);
     Utility::BufferedPage page(0, Protocol::PageParams{}, ms.rdbuf());
 

@@ -8,7 +8,7 @@
 namespace Capt::Compression {
     class ScoaStreambuf : public std::streambuf {
     private:
-        std::streambuf* rasterStream;
+        std::streambuf& rasterStream;
         ScoaState state;
         std::vector<uint8_t> buffer;
         std::vector<uint8_t> lineBuffer;

@@ -4,7 +4,7 @@
 
 using namespace Capt;
 
-TEST(PacketBuilder, AppendByte) {
+TEST(PacketBuilderTest, AppendByte) {
     constexpr auto payload = PacketBuilder()
         .AppendByte(1)
         .AppendByte(2)
@@ -13,7 +13,7 @@ TEST(PacketBuilder, AppendByte) {
     EXPECT_THAT(payload, testing::ElementsAre(1, 2, 3));
 }
 
-TEST(PacketBuilder, AppendUint16) {
+TEST(PacketBuilderTest, AppendUint16) {
     constexpr auto payload = PacketBuilder()
         .AppendUint16(0x1234)
         .AppendUint16(0x1200)
@@ -22,7 +22,7 @@ TEST(PacketBuilder, AppendUint16) {
     EXPECT_THAT(payload, testing::ElementsAre(0x34, 0x12, 0x00, 0x12, 0x34, 0x00));
 }
 
-TEST(PacketBuilder, AppendUint32) {
+TEST(PacketBuilderTest, AppendUint32) {
     constexpr auto payload = PacketBuilder()
         .AppendUint32(0xffaabbcc)
         .AppendUint32(0x00fccf00)
@@ -30,8 +30,8 @@ TEST(PacketBuilder, AppendUint32) {
     EXPECT_THAT(payload, testing::ElementsAre(0xcc, 0xbb, 0xaa, 0xff, 0x00, 0xcf, 0xfc, 0x00));
 }
 
-TEST(PacketBuilder, AppendBytes) {
-    std::array<uint8_t, 3> data{0xff, 0x0f, 0xaa};
+TEST(PacketBuilderTest, AppendBytes) {
+    std::array<uint8_t, 3> data = {0xff, 0x0f, 0xaa};
     auto payload = PacketBuilder()
         .AppendByte(1)
         .AppendByte(2)
@@ -44,7 +44,7 @@ TEST(PacketBuilder, AppendBytes) {
 /*
 // Compile-time error expected
 
-TEST(PacketBuilder, Overflow) {
+TEST(PacketBuilderTest, Overflow) {
     EXPECT_THROW({
         uint8_t data[0xffff - 7];
         PacketBuilder()
@@ -53,7 +53,7 @@ TEST(PacketBuilder, Overflow) {
     }, std::overflow_error);
 }
 
-TEST(PacketBuilder, AppendBytesOverflow) {
+TEST(PacketBuilderTest, AppendBytesOverflow) {
     EXPECT_THROW({
         uint8_t data[0xffff];
         PacketBuilder()

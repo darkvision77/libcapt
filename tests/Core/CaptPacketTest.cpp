@@ -49,7 +49,7 @@ TEST_F(CaptPacketTest, WritePayload2) {
 
 TEST_F(CaptPacketTest, WriteLongPayload) {
     std::vector<uint8_t> payload;
-    std::vector<uint8_t> expected{0x34, 0x12, 24, 2};
+    std::vector<uint8_t> expected = {0x34, 0x12, 24, 2};
     for (std::size_t i = 0; i < 532; i++) {
         payload.push_back(i & 0xff);
         expected.push_back(i & 0xff);
@@ -84,7 +84,7 @@ TEST_F(CaptPacketTest, ReadPayload2) {
 
 TEST_F(CaptPacketTest, ReadLongPayload) {
     std::vector<uint8_t> payload;
-    std::vector<uint8_t> data{0x34, 0x12, 24, 2};
+    std::vector<uint8_t> data = {0x34, 0x12, 24, 2};
     for (std::size_t i = 0; i < 532; i++) {
         payload.push_back(i & 0xff);
         data.push_back(i & 0xff);

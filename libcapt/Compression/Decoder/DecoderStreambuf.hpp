@@ -17,18 +17,17 @@ namespace Capt::Compression {
         std::size_t videoSize;
 
         void repeat(unsigned count, uint8_t repeatByte);
+        void repeatX(unsigned count);
         void copy(unsigned count);
         void raw(const std::vector<uint8_t>& data);
         void endLine();
-
-        void repeatX(unsigned count);
 
         int decodeNext();
         bool decodeLine();
 
         int_type underflow() override;
     public:
-        explicit DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog) noexcept;
+        explicit DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog = nullptr) noexcept;
     };
 }
 

@@ -9,7 +9,7 @@ namespace Capt::Compression {
     using int_type = ScoaStreambuf::int_type;
 
     ScoaStreambuf::ScoaStreambuf(std::streambuf& rasterStream, unsigned lineSize, unsigned lines)
-        : rasterStream(&rasterStream), state(lineSize), lineBuffer(lineSize), linesRemain(lines), videoSize(0) {}
+        : rasterStream(rasterStream), state(lineSize), lineBuffer(lineSize), linesRemain(lines), videoSize(0) {}
 
     std::size_t cmd_Copy(std::vector<uint8_t>& buffer, unsigned copyCount) {
         if (copyCount == 0) {
@@ -200,7 +200,7 @@ namespace Capt::Compression {
             return traits_type::eof();
         }
 
-        std::streamsize read = this->rasterStream->sgetn(reinterpret_cast<char*>(this->lineBuffer.data()), this->lineBuffer.size());
+        std::streamsize read = this->rasterStream.sgetn(reinterpret_cast<char*>(this->lineBuffer.data()), this->lineBuffer.size());
         if (read < static_cast<std::streamsize>(this->lineBuffer.size())) {
             return traits_type::eof();
         }
