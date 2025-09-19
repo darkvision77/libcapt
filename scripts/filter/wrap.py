@@ -29,15 +29,18 @@ class ShiftBufferBreakpoint(gdb.Breakpoint):
         return False
 
 class CommandBreakpoint(gdb.Breakpoint):
-    def __init__(self, name: str, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, name: str, loc: str, argsEval: list[str]=[]) -> None:
+        super().__init__(loc)
         self.name = name
+        self.argsEval = argsEval
 
     def stop(self) -> bool:
         global lastCmd
         if lastCmd is not None:
             cmdfs.write("\n")
         cmdfs.write(self.name)
+        for s in self.argsEval:
+            cmdfs.write(f" {int(gdb.parse_and_eval(s))}")
         lastCmd = self.name
         return False
 
@@ -76,20 +79,20 @@ gdb.execute("set verbose off")
 gdb.execute(f"file {FILTEREXE}")
 gdb.execute(f"set args {str.join(' ', ARGS)} > {OUTFILE}")
 
-CommandBreakpoint("CopyThenRepeat", "*0x804f03b")
-CommandBreakpoint("CopyThenRaw", "*0x804f0a0")
-CommandBreakpoint("Extend", "*0x804f102")
-CommandBreakpoint("RepeatXLong", "*0x804f17a")
-CommandBreakpoint("CopyThenRepeatLong", "*0x804f227")
-CommandBreakpoint("RepeatThenRawLong", "*0x804f2e2")
-CommandBreakpoint("CopyThenRawLong", "*0x804f3a9")
-CommandBreakpoint("CopyLong", "*0x804f6d9")
-CommandBreakpoint("EOP", "*0x804f847")
-CommandBreakpoint("RepeatX", "*0x804f9ea")
-CommandBreakpoint("CopyShort", "*0x804fb66")
-CommandBreakpoint("EOL", "*0x804fd61")
-CommandBreakpoint("NOP", "*0x804fd81")
-CommandBreakpoint("RepeatThenRaw", "*0x804fe8d")
+CommandBreakpoint("CopyThenRepeat", "*0x804f027", ["(unsigned char)$edx", "(unsigned char)$esi"])
+CommandBreakpoint("CopyThenRaw", "*0x804f091", ["(unsigned char)$edx", "(unsigned char)$esi"])
+CommandBreakpoint("Extend", "*0x804f0e2", ["(unsigned char)$edx << 3"])
+CommandBreakpoint("RepeatXLong", "*0x804f177", ["(unsigned char)$edi"])
+CommandBreakpoint("CopyThenRepeatLong", "*0x804f215", ["(unsigned char)$eax", "(unsigned char)$edi"])
+CommandBreakpoint("RepeatThenRawLong", "*0x804f2ca", ["(unsigned char)$esi", "*(int*)($ebp - 0x14 + 4)"])
+CommandBreakpoint("CopyThenRawLong", "*0x804f397", ["(unsigned char)$eax", "(unsigned char)$edi"])
+CommandBreakpoint("CopyLong", "*0x804f6c8", ["(unsigned char)$eax"])
+CommandBreakpoint("EOP", "*0x804f853")
+CommandBreakpoint("RepeatX", "*0x804f9e9", ["(unsigned char)$edi"])
+CommandBreakpoint("CopyShort", "*0x804fb5a", ["(unsigned char)$ecx"])
+CommandBreakpoint("EOL", "*0x804fd6d")
+CommandBreakpoint("NOP", "*0x804fd8d")
+CommandBreakpoint("RepeatThenRaw", "*0x804fe7e", ["(unsigned char)$esi >> 3", "(unsigned char)$eax"])
 
 # Fix captfilter's *ThenRaw bug
 ShiftBufferBreakpoint("*0x804fdc2")
