@@ -32,6 +32,8 @@ TEST(StateTest, General) {
         {1, 2, 2, 4, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5},
+        {1, 1, 1, 6, 7, 8, 9},
+        {2, 3, 4, 5, 6, 6, 6},
     };
     Compression::ScoaState state(sizeof(lines[0]));
 
@@ -52,4 +54,16 @@ TEST(StateTest, General) {
     EXPECT_THAT(state.Repeat, testing::ElementsAre(7, 6, 5, 4, 3, 2, 1));
     EXPECT_THAT(state.Raw,    testing::ElementsAre(0, 0, 0, 0, 0, 0, 0));
     state.PrevLine = {lines[2], lines[2]+sizeof(lines[2])};
+
+    state.ProcessLine(lines[3]);
+    EXPECT_THAT(state.Copy,   testing::ElementsAre(0, 0, 0, 0, 0, 0, 0));
+    EXPECT_THAT(state.Repeat, testing::ElementsAre(3, 2, 1, 1, 1, 1, 1));
+    EXPECT_THAT(state.Raw,    testing::ElementsAre(0, 0, 5, 4, 3, 2, 1));
+    state.PrevLine = {lines[3], lines[3]+sizeof(lines[3])};
+
+    state.ProcessLine(lines[4]);
+    EXPECT_THAT(state.Copy,   testing::ElementsAre(0, 0, 0, 0, 0, 0, 0));
+    EXPECT_THAT(state.Repeat, testing::ElementsAre(1, 1, 1, 1, 3, 2, 1));
+    EXPECT_THAT(state.Raw,    testing::ElementsAre(4, 3, 2, 1, 0, 0, 1));
+    state.PrevLine = {lines[4], lines[4]+sizeof(lines[4])};
 }
