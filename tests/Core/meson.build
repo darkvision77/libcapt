@@ -6,6 +6,7 @@ tests = [
     'PacketReaderTest',
     'ProtocolTest',
     'ScoaStreambufTest',
+    'ScoaStateTest',
 ]
 
 gtest_dep = dependency('gtest_main')
