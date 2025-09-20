@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <span>
-#include "CaptPacket.hpp"
+#include "PacketHeader.hpp"
 
 namespace Capt {
     template<std::size_t Size = 0>
@@ -52,7 +52,7 @@ namespace Capt {
         }
 
         inline std::ostream& WriteTo(std::ostream& stream, uint16_t opcode) const {
-            return CaptPacket::WriteTo(stream, opcode, this->Payload);
+            return PacketHeader::WriteTo(stream, opcode, this->Payload);
         }
     };
 }

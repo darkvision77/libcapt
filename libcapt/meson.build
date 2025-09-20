@@ -4,8 +4,9 @@ sources = files(
     'Compression/ScoaState.cpp',
     'Compression/ScoaStreambuf.cpp',
 
-    'Core/CaptPacket.cpp',
+    'Core/PacketHeader.cpp',
     'Core/PacketReader.cpp',
+    'Core/StreamPacket.cpp',
 
     'Utility/BufferedPage.cpp',
     'Utility/CropStreambuf.cpp',
@@ -22,9 +23,10 @@ headers = files(
     'Compression/ScoaState.hpp',
     'Compression/ScoaStreambuf.hpp',
 
-    'Core/CaptPacket.hpp',
+    'Core/PacketHeader.hpp',
     'Core/PacketBuilder.hpp',
     'Core/PacketReader.hpp',
+    'Core/StreamPacket.hpp',
 
     'Utility/BufferedPage.hpp',
     'Utility/Crop.hpp',

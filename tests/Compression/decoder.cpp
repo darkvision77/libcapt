@@ -1,4 +1,4 @@
-#include "libcapt/Core/CaptPacket.hpp"
+#include "libcapt/Core/StreamPacket.hpp"
 #include "libcapt/Compression/Decoder/DecoderStreambuf.hpp"
 #include <cassert>
 #include <cstdio>
@@ -11,14 +11,14 @@ using namespace Capt;
 class VideoDataStreambuf : public std::streambuf {
 private:
     std::vector<uint8_t> buffer;
-    std::istream& reader;
+    std::istream& stream;
 public:
     unsigned LineSize = 0;
     unsigned LinesCount = 0;
 
 protected:
     int_type underflow() override {
-        if (this->reader.eof() || this->reader.fail()) {
+        if (!this->stream.good()) {
             return traits_type::eof();
         }
         if (this->gptr() < this->egptr()) {
@@ -27,14 +27,18 @@ protected:
 
         assert(this->LineSize != 0 && this->LinesCount != 0);
         while (true) {
-            CaptPacket packet;
-            if (!(this->reader >> packet)) {
+            StreamPacket packet;
+            if (!(this->stream >> packet)) {
                 return traits_type::eof();
             }
-            if (packet.Opcode == 3 || packet.Opcode == 0xD0A2) {
+            if (packet.Header.Opcode == 3 || packet.Header.Opcode == 0xD0A2) {
                 return traits_type::eof();
-            } else if (packet.Opcode == 0xC0A0) {
-                this->buffer = packet.Payload;
+            } else if (packet.Header.Opcode == 0xC0A0) {
+                this->buffer.resize(packet.Header.PayloadSize);
+                packet.ReadBytes(this->buffer);
+                if (!this->stream.good()) {
+                    return traits_type::eof();
+                }
                 break;
             }
         }
@@ -45,14 +49,20 @@ protected:
     }
 
 public:
-    VideoDataStreambuf(std::istream& reader) : reader(reader) {}
+    explicit VideoDataStreambuf(std::istream& reader) noexcept : stream(reader) {}
 
     bool ReadHeader() {
-        CaptPacket packet;
-        while (this->reader >> packet) {
-            if (packet.Opcode == 0xD0A0) {
-                this->LineSize = (static_cast<unsigned>(packet.Payload[31-4]) << 8) | static_cast<unsigned>(packet.Payload[30-4]);
-                this->LinesCount = (static_cast<unsigned>(packet.Payload[33-4]) << 8) | static_cast<unsigned>(packet.Payload[32-4]);
+        StreamPacket packet;
+        while (this->stream >> packet) {
+            if (packet.Header.Opcode == 0xD0A0) {
+                assert(packet.Header.PayloadSize >= 33);
+                std::vector<uint8_t> payload(packet.Header.PayloadSize);
+                packet.ReadBytes(payload);
+                if (!this->stream.good()) {
+                    return false;
+                }
+                this->LineSize = (static_cast<unsigned>(payload[31-4]) << 8) | static_cast<unsigned>(payload[30-4]);
+                this->LinesCount = (static_cast<unsigned>(payload[33-4]) << 8) | static_cast<unsigned>(payload[32-4]);
                 return true;
             }
         }

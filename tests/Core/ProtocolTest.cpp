@@ -1,5 +1,5 @@
 #include "libcapt/Protocol/Protocol.hpp"
-#include "libcapt/Core/CaptPacket.hpp"
+#include "libcapt/Core/PacketHeader.hpp"
 #include "libcapt/Protocol/Enums.hpp"
 #include "libcapt/Protocol/ExtendedStatus.hpp"
 #include "libcapt/Protocol/PrinterInfo.hpp"
@@ -16,14 +16,18 @@ protected:
     MemoryStream stream;
 
     void WritePacket(uint16_t opcode, const std::vector<uint8_t>& payload = {}) {
-        CaptPacket::WriteTo(this->stream, opcode, payload);
+        PacketHeader::WriteTo(this->stream, opcode, payload);
     }
 
     void ExpectPacket(uint16_t opcode, const std::vector<uint8_t>& payload = {}) {
-        CaptPacket packet;
-        this->stream >> packet;
-        EXPECT_EQ(packet.Opcode, opcode);
-        EXPECT_THAT(packet.Payload, testing::ElementsAreArray(payload));
+        PacketHeader header;
+        ASSERT_TRUE(this->stream >> header);
+        EXPECT_EQ(header.Opcode, opcode);
+        EXPECT_EQ(header.PayloadSize, payload.size());
+
+        std::vector<uint8_t> buff(header.PayloadSize);
+        ASSERT_TRUE(this->stream.read(reinterpret_cast<char*>(buff.data()), buff.size()));
+        EXPECT_THAT(buff, testing::ElementsAreArray(payload));
     }
 };
 

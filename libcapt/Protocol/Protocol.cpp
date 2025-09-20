@@ -1,9 +1,9 @@
 #include "Protocol.hpp"
-#include "Core/CaptPacket.hpp"
+#include "Core/PacketHeader.hpp"
 #include "Core/PacketBuilder.hpp"
 #include "Enums.hpp"
 #include "ExtendedStatus.hpp"
-#include "Core/PacketReader.hpp"
+#include "Core/StreamPacket.hpp"
 #include "ProtocolError.hpp"
 #include <cstdint>
 #include <iomanip>
@@ -53,78 +53,74 @@ namespace Capt::Protocol {
     }
 
     void IC_BEGIN_DATA(std::ostream& stream) {
-        CaptPacket::WriteTo(stream, 0xD0A1) << std::flush;
+        PacketHeader::WriteTo(stream, 0xD0A1) << std::flush;
     }
 
     void IC_END_PAGE(std::ostream& stream) {
-        CaptPacket::WriteTo(stream, 0xD0A2) << std::flush;
+        PacketHeader::WriteTo(stream, 0xD0A2) << std::flush;
     }
 
     void IC_VIDEO_DATA(std::ostream& stream, std::span<const uint8_t> data) {
-        CaptPacket::WriteTo(stream, 0xC0A0, data) << std::flush;
+        PacketHeader::WriteTo(stream, 0xC0A0, data) << std::flush;
     }
 
     ExtendedStatus PC_GET_EXTENDED_STATUS(std::iostream& stream) {
-        CaptPacket::WriteTo(stream, 0xA0A0) << std::flush;
+        PacketHeader::WriteTo(stream, 0xA0A0) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, 0xA0A0);
-        PacketReader reader(packet.Payload);
+        checkOpcode(packet.Header.Opcode, 0xA0A0);
 
         ExtendedStatus result;
-        result.Basic = static_cast<BasicStatus>(reader.ReadByte());
+        result.Basic = static_cast<BasicStatus>(packet.ReadByte());
         if ((result.Basic & BasicStatus::ERROR_BIT) != 0) {
             std::ostringstream ss;
             ss << "PC_GET_EXTENDED_STATUS returned error: 0x";
             ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(result.Basic);
             throw ProtocolError(ss.str());
         }
-        result.Changed = reader.ReadByte();
-        result.Aux = static_cast<AuxStatus>(reader.ReadByte());
-        result.Controller = static_cast<ControllerStatus>(reader.ReadByte());
-        result.PaperAvailableBits = reader.ReadByte();
-        reader.ReadByte(); // param_1 + 0x27d
-        result.Engine = static_cast<EngineReadyStatus>(reader.ReadUint16());
-        result.Start = reader.ReadUint16();
-        result.Printing = reader.ReadUint16();
-        result.Shipped = reader.ReadUint16();
-        result.Printed = reader.ReadUint16();
+        result.Changed = packet.ReadByte();
+        result.Aux = static_cast<AuxStatus>(packet.ReadByte());
+        result.Controller = static_cast<ControllerStatus>(packet.ReadByte());
+        result.PaperAvailableBits = packet.ReadByte();
+        packet.ReadByte(); // param_1 + 0x27d
+        result.Engine = static_cast<EngineReadyStatus>(packet.ReadUint16());
+        result.Start = packet.ReadUint16();
+        result.Printing = packet.ReadUint16();
+        result.Shipped = packet.ReadUint16();
+        result.Printed = packet.ReadUint16();
         return result;
     }
 
     PrinterInfo PC_GET_PRINTER_INFO(std::iostream& stream) {
-        CaptPacket::WriteTo(stream, 0xA1A1) << std::flush;
+        PacketHeader::WriteTo(stream, 0xA1A1) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, 0xA1A1);
-        PacketReader reader(packet.Payload);
+        checkOpcode(packet.Header.Opcode, 0xA1A1);
 
         PrinterInfo result;
-        reader.ReadByte(); // local_15
-        reader.ReadByte(); // local_16
-        result.DeviceId = reader.ReadByte();
-        result.Type = reader.ReadByte();
-        result.VersionMajor = reader.ReadByte();
-        result.VersionMinor = reader.ReadByte();
-        result.BlockSize = reader.ReadUint16();
-        result.Buffers = reader.ReadUint16();
+        packet.ReadByte(); // local_15
+        packet.ReadByte(); // local_16
+        result.DeviceId = packet.ReadByte();
+        result.Type = packet.ReadByte();
+        result.VersionMajor = packet.ReadByte();
+        result.VersionMinor = packet.ReadByte();
+        result.BlockSize = packet.ReadUint16();
+        result.Buffers = packet.ReadUint16();
         // other unknown fields
         return result;
     }
 
     BasicStatus PCR_GET_BASIC_STATUS(std::iostream& stream, uint8_t* changed) {
-        CaptPacket::WriteTo(stream, 0xE0A0) << std::flush;
+        PacketHeader::WriteTo(stream, 0xE0A0) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, 0xE0A0);
-        PacketReader reader(packet.Payload);
-        BasicStatus status = static_cast<BasicStatus>(reader.ReadByte());
-        uint8_t ch = reader.ReadByte();
+        checkOpcode(packet.Header.Opcode, 0xE0A0);
+        BasicStatus status = static_cast<BasicStatus>(packet.ReadByte());
         if (changed != nullptr) {
-            *changed = ch;
+            *changed = packet.ReadByte();
         }
         return status;
     }
@@ -137,11 +133,10 @@ namespace Capt::Protocol {
             .AppendByte(0) // const byte
             .WriteTo(stream, 0xE0A5) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, 0xE0A5);
-        PacketReader reader(packet.Payload);
-        uint8_t err = reader.ReadByte();
+        checkOpcode(packet.Header.Opcode, 0xE0A5);
+        uint8_t err = packet.ReadByte();
         return err;
     }
 
@@ -153,23 +148,21 @@ namespace Capt::Protocol {
             .AppendByte(0) // const byte
             .WriteTo(stream, 0xE0AD) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, 0xE0AD);
-        PacketReader reader(packet.Payload);
-        uint8_t err = reader.ReadByte();
+        checkOpcode(packet.Header.Opcode, 0xE0AD);
+        uint8_t err = packet.ReadByte();
         // there is one more byte ignored by the original software
         return err;
     }
 
     static uint8_t execCmd(std::iostream& stream, uint16_t opcode) {
-        CaptPacket::WriteTo(stream, opcode) << std::flush;
+        PacketHeader::WriteTo(stream, opcode) << std::flush;
 
-        CaptPacket packet;
+        StreamPacket packet;
         stream >> packet;
-        checkOpcode(packet.Opcode, opcode);
-        PacketReader reader(packet.Payload);
-        uint8_t err = reader.ReadByte();
+        checkOpcode(packet.Header.Opcode, opcode);
+        uint8_t err = packet.ReadByte();
         return err;
     }
 

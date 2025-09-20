@@ -1,12 +1,13 @@
 tests = [
     'BufferedPageTest',
-    'CaptPacketTest',
+    'PacketHeaderTest',
     'CropStreambufTest',
     'PacketBuilderTest',
     'PacketReaderTest',
     'ProtocolTest',
     'ScoaStreambufTest',
     'ScoaStateTest',
+    'StreamPacketTest',
 ]
 
 gtest_dep = dependency('gtest_main')
