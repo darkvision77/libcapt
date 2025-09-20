@@ -1,3 +1,4 @@
+#include "FileStreambuf.hpp"
 #include "libcapt/Utility/BufferedPage.hpp"
 #include "libcapt/BasicCaptPrinter.hpp"
 #include "libcapt/Compression/ScoaStreambuf.hpp"
@@ -198,11 +199,12 @@ int main(int argc, char* argv[]) {
         std::printf("Usage: %s printerdev pbmfile\n", argv[0]);
         return 1;
     }
-    std::fstream printerStream(argv[1], std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-    if (!printerStream.is_open()) {
+    FileStreambuf fs;
+    if (!fs.Open(argv[1], "r+")) {
         std::puts("Failed to open printer stream");
         return 1;
     }
+    std::iostream printerStream(&fs);
 
     std::fstream pbmStream(argv[2], std::ios_base::in | std::ios_base::binary);
     if (!pbmStream.is_open()) {

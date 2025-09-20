@@ -1,10 +1,10 @@
+#include "FileStreambuf.hpp"
 #include "libcapt/Protocol/ExtendedStatus.hpp"
 #include "libcapt/Protocol/PageParams.hpp"
 #include "libcapt/Protocol/Protocol.hpp"
 #include <cassert>
 #include <cstdio>
 #include <iostream>
-#include <fstream>
 #include <vector>
 
 using namespace Capt;
@@ -52,11 +52,12 @@ int main(int argc, char* argv[]) {
         std::printf("Usage: %s printerdev\n", argv[0]);
         return 1;
     }
-    std::fstream printerStream(argv[1], std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-    if (!printerStream.is_open()) {
+    FileStreambuf fs;
+    if (!fs.Open(argv[1], "r+")) {
         std::puts("Failed to open printer stream");
         return 1;
     }
+    std::iostream printerStream(&fs);
 
     Protocol::PrinterInfo info = Protocol::PC_GET_PRINTER_INFO(printerStream);
     printPrinterInfo(info);

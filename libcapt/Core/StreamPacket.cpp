@@ -62,7 +62,10 @@ namespace Capt {
             return;
         }
         if (this->stream != nullptr && this->stream->good()) {
-            this->stream->ignore(this->remain);
+            // std::istream::ignore calls unnecessary underflow
+            for (std::size_t i = 0; i < this->remain; i++) {
+                this->stream->rdbuf()->sbumpc();
+            }
         }
         this->remain = 0;
     }
