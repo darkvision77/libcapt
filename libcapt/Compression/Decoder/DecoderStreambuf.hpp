@@ -9,7 +9,7 @@
 namespace Capt::Compression {
     class DecoderStreambuf : public std::streambuf {
     private:
-        std::streambuf& reader;
+        std::streambuf& stream;
         std::ostream* commandLog;
 
         std::vector<uint8_t> buffer;
@@ -27,7 +27,7 @@ namespace Capt::Compression {
 
         int_type underflow() override;
     public:
-        explicit DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog = nullptr) noexcept;
+        explicit DecoderStreambuf(std::streambuf& stream, unsigned lineSize, std::ostream* commandLog = nullptr) noexcept;
     };
 }
 

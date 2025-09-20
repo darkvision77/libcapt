@@ -32,8 +32,8 @@ namespace Capt::Compression {
         return read;
     }
 
-    DecoderStreambuf::DecoderStreambuf(std::streambuf& reader, unsigned lineSize, std::ostream* commandLog) noexcept
-        : reader(reader), commandLog(commandLog), lineSize(lineSize), videoSize(0) {}
+    DecoderStreambuf::DecoderStreambuf(std::streambuf& stream, unsigned lineSize, std::ostream* commandLog) noexcept
+        : stream(stream), commandLog(commandLog), lineSize(lineSize), videoSize(0) {}
 
     void DecoderStreambuf::repeat(unsigned count, uint8_t repeatByte) {
         if (count == 0) {
@@ -70,7 +70,7 @@ namespace Capt::Compression {
     }
 
     int DecoderStreambuf::decodeNext() {
-        uint8_t cmd = mustGet(this->reader);
+        uint8_t cmd = mustGet(this->stream);
         if (cmd == 0x42) { // EOP
             CLOG("EOP") << std::endl;
             return 0;
@@ -84,7 +84,7 @@ namespace Capt::Compression {
         } else if ((cmd & 0xe0) == 0xa0) { // Extend
             uint8_t extendCount = (cmd & 0x1f) << 3;
             CLOG("Extend ") << static_cast<int>(extendCount) << std::endl;
-            cmd = mustGet(this->reader);
+            cmd = mustGet(this->stream);
             if ((cmd & 0xc0) == 0) { // RepeatXLong
                 uint8_t repeatCount = extendCount + ((cmd >> 3) & 7);
                 CLOG("RepeatXLong ") << static_cast<int>(repeatCount) << std::endl;
@@ -94,7 +94,7 @@ namespace Capt::Compression {
             } else if ((cmd & 0xc0) == 0x80) { // CopyThenRepeatLong
                 uint8_t copyCount = (cmd & 7);
                 uint8_t repeatCount = extendCount + ((cmd >> 3) & 7);
-                uint8_t repeatByte = mustGet(this->reader);
+                uint8_t repeatByte = mustGet(this->stream);
                 CLOG("CopyThenRepeatLong ") << static_cast<int>(copyCount) << ' ' << static_cast<int>(repeatCount) << std::endl;
                 CHECK_BOUNDS(copyCount, 0, 7);
                 CHECK_BOUNDS(repeatCount, 8, 255);
@@ -104,10 +104,10 @@ namespace Capt::Compression {
             } else if ((cmd & 0xc0) == 0x40) { // RepeatThenRawLong
                 uint8_t rawCount = extendCount + (cmd & 7);
                 uint8_t repeatCount = ((cmd >> 3) & 7);
-                uint8_t repeatByte = mustGet(this->reader);
+                uint8_t repeatByte = mustGet(this->stream);
                 CLOG("RepeatThenRawLong ") << static_cast<int>(repeatCount) << ' ' << static_cast<int>(rawCount) << std::endl;
                 std::vector<uint8_t> rawData(rawCount);
-                mustRead(this->reader, reinterpret_cast<char*>(rawData.data()), rawCount);
+                mustRead(this->stream, reinterpret_cast<char*>(rawData.data()), rawCount);
                 CHECK_BOUNDS(repeatCount, 2, 7);
                 CHECK_BOUNDS(rawCount, 8, 255);
                 this->repeat(repeatCount, repeatByte);
@@ -118,7 +118,7 @@ namespace Capt::Compression {
                 uint8_t rawCount = extendCount + ((cmd >> 3) & 7);
                 CLOG("CopyThenRawLong ") << static_cast<int>(copyCount) << ' ' << static_cast<int>(rawCount) << std::endl;
                 std::vector<uint8_t> rawData(rawCount);
-                mustRead(this->reader, reinterpret_cast<char*>(rawData.data()), rawCount);
+                mustRead(this->stream, reinterpret_cast<char*>(rawData.data()), rawCount);
                 CHECK_BOUNDS(copyCount, 0, 7);
                 CHECK_BOUNDS(rawCount, 8, 255);
                 this->copy(copyCount);
@@ -134,7 +134,7 @@ namespace Capt::Compression {
         } else if ((cmd & 0xc0) == 0x40) { // CopyThenRepeat
             uint8_t copyCount = (cmd & 7);
             uint8_t repeatCount = ((cmd >> 3) & 7);
-            uint8_t repeatByte = mustGet(this->reader);
+            uint8_t repeatByte = mustGet(this->stream);
             CLOG("CopyThenRepeat ") << static_cast<int>(copyCount) << ' ' << static_cast<int>(repeatCount) << std::endl;
             CHECK_BOUNDS(copyCount, 0, 7);
             CHECK_BOUNDS(repeatCount, 2, 7);
@@ -146,7 +146,7 @@ namespace Capt::Compression {
             uint8_t rawCount = ((cmd >> 3) & 7);
             CLOG("CopyThenRaw ") << static_cast<int>(copyCount) << ' ' << static_cast<int>(rawCount) << std::endl;
             std::vector<uint8_t> rawData(rawCount);
-            mustRead(this->reader, reinterpret_cast<char*>(rawData.data()), rawCount);
+            mustRead(this->stream, reinterpret_cast<char*>(rawData.data()), rawCount);
             CHECK_BOUNDS(copyCount, 0, 7);
             CHECK_BOUNDS(rawCount, 1, 7);
             this->copy(copyCount);
@@ -166,10 +166,10 @@ namespace Capt::Compression {
                 return 1;
             } else if (copyCount != 0 && repeatCount != 0) { // RepeatThenRaw
                 uint8_t rawCount = copyCount;
-                uint8_t repeatByte = mustGet(this->reader);
+                uint8_t repeatByte = mustGet(this->stream);
                 CLOG("RepeatThenRaw ") << static_cast<int>(repeatCount) << ' ' << static_cast<int>(rawCount) << std::endl;
                 std::vector<uint8_t> rawData(rawCount);
-                mustRead(this->reader, reinterpret_cast<char*>(rawData.data()), rawCount);
+                mustRead(this->stream, reinterpret_cast<char*>(rawData.data()), rawCount);
                 CHECK_BOUNDS(repeatCount, 2, 7);
                 CHECK_BOUNDS(rawCount, 1, 7);
                 this->repeat(repeatCount, repeatByte);
