@@ -62,23 +62,22 @@ int main(int argc, char* argv[]) {
     Protocol::PrinterInfo info = Protocol::PC_GET_PRINTER_INFO(printerStream);
     printPrinterInfo(info);
 
-    Protocol::ExtendedStatus status = Protocol::PC_GET_EXTENDED_STATUS(printerStream);
-    if (status.PaperAvailableBits != 0) {
-        std::puts("Video buffer size detection is not available: remove paper first");
-        return 0;
-    }
-
-    if ((status.Basic & Protocol::BasicStatus::IM_DATA_BUSY) != 0) {
-        std::puts("Video buffer size detection error: IM_DATA_BUSY");
-        return 1;
-    }
-
     assert(Protocol::PC_RESERVE_UNIT(printerStream) == 0);
     std::puts("Unit reserved");
 
     Protocol::PCR_CLEAR_ERROR(printerStream);
     Protocol::PCR_DISCARD_DATA(printerStream);
     Protocol::PCR_GO_ONLINE(printerStream, 0);
+
+    Protocol::ExtendedStatus status = Protocol::PC_GET_EXTENDED_STATUS(printerStream);
+    if (status.PaperAvailableBits != 0) {
+        std::puts("Video buffer size detection is not available: remove paper first");
+        return 0;
+    }
+    if ((status.Basic & Protocol::BasicStatus::IM_DATA_BUSY) != 0) {
+        std::puts("Video buffer size detection error: IM_DATA_BUSY");
+        return 1;
+    }
 
     Protocol::IC_BEGIN_DATA(printerStream);
 
