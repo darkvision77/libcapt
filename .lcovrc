@@ -1,0 +1,9 @@
+branch_coverage = 1
+no_exception_branch = 1
+
+ignore_errors = inconsistent
+ignore_errors = unused
+ignore_errors = mismatch
+
+exclude = tests/
+exclude = examples/
