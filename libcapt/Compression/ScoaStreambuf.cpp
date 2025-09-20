@@ -22,7 +22,6 @@ namespace Capt::Compression {
             vsize += ScoaCmd::CopyLong(buffer, copy);
             copyCount -= copy;
         }
-        assert(copyCount <= 7);
         if (copyCount != 0) {
             vsize += ScoaCmd::CopyShort(buffer, copyCount);
         }
@@ -128,8 +127,9 @@ namespace Capt::Compression {
                 }
             } else {
                 if (repeatCount >= 2) {
-                    vsize += ScoaCmd::RepeatThenRaw(buffer, repeatCount, repeatByte, rawData.subspan(0, 7));
-                    rawData = rawData.subspan(7);
+                    std::size_t count = std::min(rawData.size(), 255uz);
+                    vsize += ScoaCmd::RepeatThenRawLong(buffer, repeatCount, repeatByte, rawData.subspan(0, count));
+                    rawData = rawData.subspan(count);
                 } else if (repeatCount != 0) {
                     vsize += cmd_CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
                 }
