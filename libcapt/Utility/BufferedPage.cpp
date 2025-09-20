@@ -56,7 +56,7 @@ namespace Capt::Utility {
         this->setg(start, start, end);
     }
 
-    void BufferedPage::operator=(BufferedPage&& other) noexcept {
+    BufferedPage& BufferedPage::operator=(BufferedPage&& other) noexcept {
         this->buffer = std::move(other.buffer);
         this->PageNumber = other.PageNumber;
         this->Params = std::move(other.Params);
@@ -64,5 +64,6 @@ namespace Capt::Utility {
         char_type* start = this->buffer.data();
         char_type* end = start + this->buffer.size();
         this->setg(start, start, end);
+        return *this;
     }
 }

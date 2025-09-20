@@ -20,12 +20,13 @@ namespace Capt::Utility {
         Protocol::PageParams Params;
 
         BufferedPage() = default;
-
         explicit BufferedPage(unsigned page, const Protocol::PageParams& params, std::streambuf* stream, std::size_t blockSize = 4096) noexcept;
 
-        BufferedPage(const BufferedPage& other) = delete;
+        BufferedPage(const BufferedPage&) = delete;
+        BufferedPage& operator=(const BufferedPage&) = delete;
+
         BufferedPage(BufferedPage&& other) noexcept;
-        void operator=(BufferedPage&& other) noexcept;
+        BufferedPage& operator=(BufferedPage&& other) noexcept;
     };
 }
 
