@@ -17,11 +17,12 @@ namespace Capt::Compression {
     }
 
     inline static uint8_t mustGet(std::streambuf& stream) {
+        using traits_type = std::streambuf::traits_type;
         std::streambuf::int_type v = stream.sbumpc();
-        if (v == std::streambuf::traits_type::eof()) {
+        if (traits_type::eq_int_type(v, traits_type::eof())) {
             throw DecoderError("unexpected EOF");
         }
-        return std::streambuf::traits_type::to_char_type(v);
+        return traits_type::to_char_type(v);
     }
 
     inline static std::streamsize mustRead(std::streambuf& stream, std::streambuf::char_type* s, std::streamsize n) {

@@ -13,13 +13,11 @@ private:
     char_type curr = 0;
 
     int_type overflow(int_type c = traits_type::eof()) override {
-        if (c == traits_type::eof()) {
-            return traits_type::eof();
+        if (!traits_type::eq_int_type(c, traits_type::eof())) {
+            *this->pptr() = traits_type::to_char_type(c);
+            this->pbump(1);
         }
-        this->sync();
-        *this->pptr() = traits_type::to_char_type(c);
-        this->pbump(1);
-        return traits_type::not_eof(c);
+        return this->sync() == 0 ? traits_type::not_eof(c) : traits_type::eof();
     }
 
     int_type underflow() override {
@@ -32,7 +30,7 @@ private:
             return traits_type::eof();
         }
         this->setg(&this->curr, &this->curr, &this->curr + 1);
-        return traits_type::to_int_type(this->curr);
+        return traits_type::to_int_type(*this->gptr());
     }
 
     std::streamsize xsgetn(char_type* s, std::streamsize n) override {
@@ -46,21 +44,20 @@ private:
     int sync() override {
         assert(this->file != nullptr);
         std::ptrdiff_t count = this->pptr() - this->pbase();
-        if (count == 0) {
-            return 0;
+        if (count != 0) {
+            std::ptrdiff_t w = std::fwrite(this->pbase(), sizeof(char_type), count, this->file);
+            if (w != count) {
+                return -1;
+            }
+            this->pbump(-w);
+            assert(this->pptr() == this->pbase());
         }
-        std::ptrdiff_t w = std::fwrite(this->pbase(), sizeof(char_type), count, this->file);
-        if (w != count) {
-            return -1;
-        }
-        this->pbump(-w);
-        assert(this->pptr() == this->pbase());
-        return std::fflush(this->file);
+        return std::fflush(this->file) == 0 ? 0 : -1;
     }
 public:
     explicit FileStreambuf(std::size_t wbuffsize = 4096) : wbuff(wbuffsize) {
         char_type* start = this->wbuff.data();
-        char_type* end = start + this->wbuff.size();
+        char_type* end = start + this->wbuff.size() - 1;
         this->setp(start, end);
     }
 

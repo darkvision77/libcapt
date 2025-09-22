@@ -8,11 +8,12 @@ namespace Capt::Utility {
     using int_type = CropStreambuf::int_type;
 
     static std::streamsize discard(std::streambuf& stream, std::streamsize count) {
+        using traits_type = std::streambuf::traits_type;
         std::streamsize read = 0;
         while (read != count) {
             std::streambuf::int_type c = stream.sbumpc();
             read++;
-            if (c == std::streambuf::traits_type::eof()) {
+            if (traits_type::eq_int_type(c, traits_type::eof())) {
                 break;
             }
         }
