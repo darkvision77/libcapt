@@ -74,12 +74,13 @@ int main(int argc, char* argv[]) {
         std::puts("Video buffer size detection is not available: remove paper first");
         return 0;
     }
+
+    Protocol::IC_BEGIN_DATA(printerStream);
+
     if ((status.Basic & Protocol::BasicStatus::IM_DATA_BUSY) != 0) {
         std::puts("Video buffer size detection error: IM_DATA_BUSY");
         return 1;
     }
-
-    Protocol::IC_BEGIN_DATA(printerStream);
 
     Protocol::PageParams dummyParams{
         .PaperSize = 0x09,
