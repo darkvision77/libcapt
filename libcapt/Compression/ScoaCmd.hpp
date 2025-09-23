@@ -6,6 +6,8 @@
 #include <span>
 
 namespace Capt::Compression::ScoaCmd {
+    constexpr inline uint8_t RepeatXByte = 0x43;
+
     std::size_t CopyLong(std::vector<uint8_t>& buffer, unsigned copyCount);
     std::size_t CopyShort(std::vector<uint8_t>& buffer, unsigned copyCount);
     std::size_t CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData);
