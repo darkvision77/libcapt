@@ -62,14 +62,19 @@ public:
     }
 
     ~FileStreambuf() {
-        if (this->file != nullptr) {
-            std::fclose(this->file);
-        }
+        this->Close();
     }
 
     bool Open(const char* filename, const char* mode) {
         this->file = std::fopen(filename, mode);
         return this->file != nullptr;
+    }
+
+    void Close() {
+        if (this->file != nullptr) {
+            std::fclose(this->file);
+            this->file = nullptr;
+        }
     }
 };
 
