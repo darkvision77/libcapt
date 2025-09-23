@@ -7,3 +7,5 @@ ignore_errors = mismatch
 
 exclude = tests/
 exclude = examples/
+
+omit_lines = .*assert.*
