@@ -24,30 +24,6 @@ namespace Capt {
         return *this;
     }
 
-    uint8_t StreamPacket::ReadByte() {
-        assert(this->stream != nullptr);
-        if (this->remain == 0) {
-            throw std::out_of_range("packet payload EOF");
-        }
-        this->remain--;
-        return this->stream->get();
-    }
-
-    uint16_t StreamPacket::ReadUint16() {
-        uint16_t lo = this->ReadByte();
-        uint16_t hi = this->ReadByte();
-        return (hi << 8) | lo;
-    }
-
-    uint32_t StreamPacket::ReadUint32() {
-        uint32_t value = 0;
-        value |= this->ReadByte();
-        value |= this->ReadByte() << 8;
-        value |= this->ReadByte() << 16;
-        value |= this->ReadByte() << 24;
-        return value;
-    }
-
     void StreamPacket::ReadBytes(std::span<uint8_t> dest) {
         assert(this->stream != nullptr);
         if (dest.size() > this->remain) {

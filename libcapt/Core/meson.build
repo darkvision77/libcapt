@@ -10,3 +10,5 @@ headers += files(
     'PacketReader.hpp',
     'StreamPacket.hpp',
 )
+
+subdir('Internal')
