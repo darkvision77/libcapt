@@ -9,7 +9,7 @@ namespace Capt {
             throw std::out_of_range("packet payload EOF");
         }
         uint8_t value = *this->iter;
-        this->iter++;
+        ++this->iter;
         return value;
     }
 

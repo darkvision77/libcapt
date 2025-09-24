@@ -180,7 +180,7 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    inline std::size_t next(std::vector<uint8_t>& buffer, std::span<const uint8_t> line, ScoaState& state) {
+    inline std::size_t nextCmd(std::vector<uint8_t>& buffer, std::span<const uint8_t> line, ScoaState& state) {
         assert(!state.Empty());
         ScoaFunc curr = state.Get();
         if (curr.Type == ScoaFuncType::Copy) {
@@ -227,7 +227,7 @@ namespace Capt::Compression {
 
         ScoaState state(this->currLine, this->videoSize == 0 ? std::span<const uint8_t>() : this->prevLine);
         while (!state.Empty()) {
-            this->videoSize += next(this->buffer, this->currLine, state);
+            this->videoSize += nextCmd(this->buffer, this->currLine, state);
         }
 
         this->prevLine.resize(this->currLine.size());

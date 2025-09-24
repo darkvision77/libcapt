@@ -56,7 +56,7 @@ namespace Capt {
 
         // nullopt if stop requested
         inline virtual std::optional<Protocol::ExtendedStatus> WaitPrintEnd(std::stop_token stopToken) {
-            return this->WaitStatus(stopToken, [](Protocol::ExtendedStatus ex) {
+            return this->WaitStatus(stopToken, [](const Protocol::ExtendedStatus& ex) {
                 return !ex.IsPrinting();
             }, std::chrono::seconds(1));
         }
