@@ -2,22 +2,35 @@
 #include "ScoaState.hpp"
 #include "ScoaCmd.hpp"
 #include <cassert>
-#include <ios>
 #include <iostream>
+#include <span>
 
 namespace Capt::Compression {
     using int_type = ScoaStreambuf::int_type;
 
-    ScoaStreambuf::ScoaStreambuf(std::streambuf& rasterStream, unsigned lineSize, unsigned lines)
-        : rasterStream(rasterStream), state(lineSize), lineBuffer(lineSize), linesRemain(lines), videoSize(0) {}
+    ScoaStreambuf::ScoaStreambuf(std::size_t bufferReserve) {
+        this->buffer.reserve(bufferReserve);
+    }
 
-    std::size_t cmd_Copy(std::vector<uint8_t>& buffer, unsigned copyCount) {
-        if (copyCount == 0) {
-            return 0;
-        }
+    ScoaStreambuf::ScoaStreambuf(std::streambuf& rasterStream, unsigned lineSize, unsigned lines, std::size_t bufferReserve)
+        : rasterStream(&rasterStream), currLine(lineSize), linesRemain(lines) {
+        this->buffer.reserve(bufferReserve);
+    }
+
+    void ScoaStreambuf::Reset(std::streambuf& rasterStream, unsigned lineSize, unsigned lines) {
+        this->rasterStream = &rasterStream;
+        this->buffer.clear();
+        this->linesRemain = lines;
+        this->currLine.resize(lineSize);
+        this->prevLine.resize(lineSize);
+        this->videoSize = 0;
+    }
+
+    inline std::size_t cmd_Copy(std::vector<uint8_t>& buffer, unsigned copyCount) {
+        assert(copyCount != 0);
         std::size_t vsize = 0;
         while (copyCount >= 8) {
-            unsigned copy = std::min(copyCount, 255u);
+            unsigned copy = std::min(copyCount, 248u);
             copy = copy - (copy % 8);
             vsize += ScoaCmd::CopyLong(buffer, copy);
             copyCount -= copy;
@@ -28,10 +41,8 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData) {
-        if (copyCount == 0 && rawData.size() == 0) {
-            return 0;
-        }
+    inline std::size_t cmd_CopyThenRaw(std::vector<uint8_t>& buffer, unsigned copyCount, std::span<const uint8_t> rawData) {
+        assert(rawData.size() != 0);
         std::size_t vsize = 0;
         if (copyCount <= 7) {
             while (rawData.size() >= 8) {
@@ -55,10 +66,8 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, std::span<const uint8_t> rawData) {
-        if (rawData.size() == 0) {
-            return 0;
-        }
+    inline std::size_t cmd_WriteRaw(std::vector<uint8_t>& buffer, std::span<const uint8_t> rawData) {
+        assert(rawData.size() != 0);
         std::size_t vsize = 0;
         if (rawData.size() <= 7) {
             vsize += ScoaCmd::CopyThenRaw(buffer, 0, rawData);
@@ -75,10 +84,8 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, unsigned copyCount, unsigned repeatCount, uint8_t repeatByte) {
-        if (repeatCount == 0 && copyCount == 0) {
-            return 0;
-        }
+    inline std::size_t cmd_CopyThenRepeat(std::vector<uint8_t>& buffer, unsigned copyCount, unsigned repeatCount, uint8_t repeatByte) {
+        assert(copyCount != 0 || repeatCount != 0);
         std::size_t vsize = 0;
         if (copyCount <= 7) {
             while (repeatCount >= 8) {
@@ -106,10 +113,30 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
-        if (repeatCount == 0 && rawData.size() == 0) {
-            return 0;
+    inline std::size_t cmd_RepeatX(std::vector<uint8_t>& buffer, unsigned repeatCount) {
+        assert(repeatCount != 0);
+        std::size_t vsize = 0;
+        while (repeatCount >= 8) {
+            unsigned rep = std::min(repeatCount, 255u);
+            vsize += ScoaCmd::RepeatXLong(buffer, rep);
+            repeatCount -= rep;
         }
+        if (repeatCount != 0) {
+            vsize += ScoaCmd::RepeatX(buffer, repeatCount);
+        }
+        return vsize;
+    }
+
+    inline std::size_t cmd_Repeat(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte) {
+        assert(repeatCount != 0);
+        if (repeatByte == ScoaCmd::RepeatXByte) {
+            return cmd_RepeatX(buffer, repeatCount);
+        }
+        return cmd_CopyThenRepeat(buffer, 0, repeatCount, repeatByte);
+    }
+
+    inline std::size_t cmd_RepeatThenRaw(std::vector<uint8_t>& buffer, unsigned repeatCount, uint8_t repeatByte, std::span<const uint8_t> rawData) {
+        assert(repeatCount != 0 || rawData.size() != 0);
         std::size_t vsize = 0;
         if (repeatCount <= 7) {
             if (rawData.size() <= 7) {
@@ -153,46 +180,37 @@ namespace Capt::Compression {
         return vsize;
     }
 
-    std::size_t ScoaStreambuf::encodeLine(std::span<const uint8_t> line) {
-        std::size_t encodedSize = 0;
-        assert(line.size() == state.LineSize);
-        for (unsigned i = 0; i < state.LineSize;) {
-            if (state.Copy[i] == state.LineSize - i) {
-                encodedSize += ScoaCmd::EOL(this->buffer);
-                break;
+    inline std::size_t next(std::vector<uint8_t>& buffer, std::span<const uint8_t> line, ScoaState& state) {
+        assert(!state.Empty());
+        ScoaFunc curr = state.Get();
+        if (curr.Type == ScoaFuncType::Copy) {
+            if ((curr.Index + curr.Count) == line.size()) {
+                return ScoaCmd::EOL(buffer);
             }
-            unsigned nextPos = i;
-            if (state.Raw[i] != 0) {
-                encodedSize += cmd_WriteRaw(this->buffer, line.subspan(i, state.Raw[i]));
-                nextPos += state.Raw[i];
-            } else if (state.Copy[i] != 0) {
-                nextPos += state.Copy[i];
-                assert(nextPos < state.LineSize);
-                if (state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_CopyThenRaw(this->buffer, state.Copy[i], line.subspan(nextPos, state.Raw[nextPos]));
-                    nextPos += state.Raw[nextPos];
-                } else if (state.Repeat[nextPos] != 1) {
-                    encodedSize += cmd_CopyThenRepeat(this->buffer, state.Copy[i], state.Repeat[nextPos], line[nextPos]);
-                    nextPos += state.Repeat[nextPos];
+            if (!state.Empty()) {
+                ScoaFunc next = state.Get();
+                if (next.Type == ScoaFuncType::Repeat) {
+                    assert(next.Count >= 2);
+                    return cmd_CopyThenRepeat(buffer, curr.Count, next.Count, line[next.Index]);
                 } else {
-                    encodedSize += cmd_Copy(this->buffer, state.Copy[i]);
-                }
-            } else if (state.Repeat[i] != 1) {
-                nextPos += state.Repeat[i];
-                if (nextPos != state.LineSize && state.Raw[nextPos] != 0) {
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], line.subspan(nextPos, state.Raw[nextPos]));
-                    nextPos += state.Raw[nextPos];
-                } else {
-                    encodedSize += cmd_RepeatThenRaw(this->buffer, state.Repeat[i], line[i], {});
+                    assert(next.Type == ScoaFuncType::Raw);
+                    return cmd_CopyThenRaw(buffer, curr.Count, next.Payload(line));
                 }
             }
-            assert(i != nextPos);
-            i = nextPos;
+            return cmd_Copy(buffer, curr.Count);
+        } else if (curr.Type == ScoaFuncType::Repeat) {
+            assert(curr.Count >= 2);
+            if (!state.Empty() && state.Peek().Type == ScoaFuncType::Raw) {
+                ScoaFunc next = state.Get();
+                return cmd_RepeatThenRaw(buffer, curr.Count, line[curr.Index], next.Payload(line));
+            }
+            return cmd_Repeat(buffer, curr.Count, line[curr.Index]);
         }
-        return encodedSize;
+        return cmd_WriteRaw(buffer, curr.Payload(line));
     }
 
     int_type ScoaStreambuf::underflow() {
+        assert(this->rasterStream != nullptr);
         if (this->gptr() < this->egptr()) {
             return traits_type::to_int_type(*this->gptr());
         }
@@ -200,16 +218,20 @@ namespace Capt::Compression {
             return traits_type::eof();
         }
 
-        std::streamsize read = this->rasterStream.sgetn(reinterpret_cast<char*>(this->lineBuffer.data()), this->lineBuffer.size());
-        if (read < static_cast<std::streamsize>(this->lineBuffer.size())) {
+        std::streamsize read = this->rasterStream->sgetn(reinterpret_cast<char*>(this->currLine.data()), this->currLine.size());
+        if (read < static_cast<std::streamsize>(this->currLine.size())) {
             return traits_type::eof();
         }
 
         this->buffer.clear();
-        this->state.ProcessLine(this->lineBuffer);
-        this->videoSize += this->encodeLine(this->lineBuffer);
-        this->state.PrevLine.resize(this->lineBuffer.size());
-        this->state.PrevLine.swap(this->lineBuffer);
+
+        ScoaState state(this->currLine, this->videoSize == 0 ? std::span<const uint8_t>() : this->prevLine);
+        while (!state.Empty()) {
+            this->videoSize += next(this->buffer, this->currLine, state);
+        }
+
+        this->prevLine.resize(this->currLine.size());
+        this->prevLine.swap(this->currLine);
 
         this->linesRemain--;
         if (this->linesRemain == 0) {

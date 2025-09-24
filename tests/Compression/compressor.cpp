@@ -59,6 +59,9 @@ int main(int argc, char* argv[]) {
     }
 
     unsigned page = 0;
+    Compression::ScoaStreambuf scoaStreambuf;
+    const std::size_t maxsize = 4096;
+    std::vector<uint8_t> buffer(maxsize);
     while (true) {
         unsigned lineSize;
         unsigned lines;
@@ -69,8 +72,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("PBM width must be a multiple of 8");
         }
         lineSize /= 8;
-
-        Compression::ScoaStreambuf scoaStreambuf(*pbmStream.rdbuf(), lineSize, lines);
+        scoaStreambuf.Reset(*pbmStream.rdbuf(), lineSize, lines);
 
         Protocol::PageParams pp;
         pp.ImageLineSize = static_cast<uint16_t>(lineSize);
@@ -81,8 +83,6 @@ int main(int argc, char* argv[]) {
 
         Protocol::IC_BEGIN_PAGE(outStream, pp);
         Protocol::IC_BEGIN_DATA(outStream);
-        const std::size_t maxsize = 4096;
-        std::vector<uint8_t> buffer(maxsize);
         while (true) {
             std::streamsize read = scoaStreambuf.sgetn(reinterpret_cast<char*>(buffer.data()), buffer.size());
             if (read <= 0) {

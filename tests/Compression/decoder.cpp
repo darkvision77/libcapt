@@ -1,3 +1,4 @@
+#include "libcapt/Compression/Decoder/DecoderError.hpp"
 #include "libcapt/Core/StreamPacket.hpp"
 #include "libcapt/Compression/Decoder/DecoderStreambuf.hpp"
 #include <cassert>
@@ -103,6 +104,7 @@ int main(int argc, char* argv[]) {
         outfile << "P4\n" << (videoStreambuf.LineSize * 8) << " " << videoStreambuf.LinesCount << "\n";
 
         std::size_t decodedSize = 0;
+        const std::size_t expectedSize = videoStreambuf.LineSize * videoStreambuf.LinesCount;
         std::vector<char> buffer(videoStreambuf.LineSize);
         while (true) {
             std::streamsize read = dec.sgetn(buffer.data(), buffer.size());
@@ -115,7 +117,10 @@ int main(int argc, char* argv[]) {
 
         std::fprintf(stderr, "Page: %u\n", page + 1);
         std::fprintf(stderr, "Decoded size  = %zu\n", decodedSize);
-        std::fprintf(stderr, "Expected size = %u\n", videoStreambuf.LineSize * videoStreambuf.LinesCount);
+        std::fprintf(stderr, "Expected size = %zu\n", expectedSize);
+        if (decodedSize != expectedSize) {
+            throw Compression::DecoderError("Raster size mismatch");
+        }
         page++;
     }
     std::fprintf(stderr, "Pages decoded: %u\n", page);
