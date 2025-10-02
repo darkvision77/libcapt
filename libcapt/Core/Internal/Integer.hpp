@@ -6,11 +6,24 @@
 #include <istream>
 
 namespace Capt::Internal {
+    namespace Impl {
+        #if defined(__GNUC__) && __GNUC__ < 12
+        constexpr uint16_t bswap(uint16_t value) noexcept { return __builtin_bswap16(value); }
+        constexpr uint32_t bswap(uint32_t value) noexcept { return __builtin_bswap32(value); }
+        constexpr uint64_t bswap(uint64_t value) noexcept { return __builtin_bswap64(value); }
+        #else
+        template<std::integral T>
+        constexpr T bswap(T value) noexcept {
+            return std::byteswap(value);
+        }
+        #endif
+    }
+
     template<std::integral T>
     [[nodiscard]] constexpr T LittleToCpu(T value) noexcept {
         static_assert(std::endian::native == std::endian::big || std::endian::native == std::endian::little);
         if constexpr (std::endian::native == std::endian::big) {
-            return std::byteswap(value);
+            return Impl::bswap(value);
         } else {
             return value;
         }
