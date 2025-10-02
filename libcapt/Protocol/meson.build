@@ -1,4 +1,5 @@
 sources += files(
+    'ExtendedStatus.cpp',
     'Protocol.cpp',
 )
 

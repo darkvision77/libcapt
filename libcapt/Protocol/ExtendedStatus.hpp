@@ -4,6 +4,7 @@
 #include "Enums.hpp"
 #include "ReprintStatus.hpp"
 #include <cstdint>
+#include <ostream>
 
 namespace Capt::Protocol {
     struct ExtendedStatus {
@@ -91,6 +92,8 @@ namespace Capt::Protocol {
                 || (this->Engine & EngineReadyStatus::SERVICE_CALL) != 0;
         }
     };
+
+    std::ostream& operator<<(std::ostream& os, const ExtendedStatus& status);
 }
 
 #endif
