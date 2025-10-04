@@ -1,7 +1,7 @@
 project(
     'libcapt',
     'cpp',
-    version: '0.1.1',
+    version: '0.12.1',
     license: 'BSD-2-Clause',
     license_files: ['LICENSE'],
     default_options: [
