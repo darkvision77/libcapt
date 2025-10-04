@@ -1,6 +1,7 @@
 #include "libcapt/Compression/ScoaStreambuf.hpp"
 #include "libcapt/Compression/Decoder/DecoderStreambuf.hpp"
 #include "MemoryStream.hpp"
+#include <exception>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <cstdint>
@@ -52,8 +53,11 @@ TEST(ScoaStreambufTest, PartialRaster) {
     compressed << &ss;
 
     MemoryStream dst;
-    Compression::DecoderStreambuf dec(*compressed.rdbuf(), 10, nullptr);
-    dst << &dec;
+    try {
+        dst.exceptions(std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit);
+        Compression::DecoderStreambuf dec(*compressed.rdbuf(), 10, nullptr);
+        dst << &dec;
+    } catch (const std::exception&) {}
 
     EXPECT_THAT(dst.Buffer(), testing::ElementsAreArray(expected));
 }
