@@ -20,7 +20,11 @@ option(COMPRESSION_TESTS "Build compressor and decoder tests" OFF)
 option(COVERAGE "Enable code coverage" OFF)
 option(SANITIZE "Enable address and undefined sanitizers" OFF)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
+if(MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 if(COVERAGE)
     add_compile_options(--coverage -g)
