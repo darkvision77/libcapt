@@ -1,6 +1,8 @@
 #include "libcapt/Core/PacketBuilder.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdint>
+#include <array>
 
 using namespace Capt;
 

@@ -1,6 +1,7 @@
 #ifndef _LIBCAPT_CORE_PACKET_READER_HPP_
 #define _LIBCAPT_CORE_PACKET_READER_HPP_
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 

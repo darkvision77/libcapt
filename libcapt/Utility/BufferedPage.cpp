@@ -1,4 +1,5 @@
 #include "BufferedPage.hpp"
+#include <utility>
 
 namespace Capt::Utility {
     using int_type = BufferedPage::int_type;

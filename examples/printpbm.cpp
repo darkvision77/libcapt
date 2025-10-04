@@ -9,11 +9,14 @@
 #include <cassert>
 #include <csignal>
 #include <cstdio>
-#include <iostream>
 #include <fstream>
 #include <stdexcept>
 #include <stop_token>
 #include <thread>
+#include <cstdint>
+#include <cctype>
+#include <optional>
+#include <utility>
 
 using namespace Capt;
 using namespace std::literals::chrono_literals;

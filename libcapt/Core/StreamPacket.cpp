@@ -1,5 +1,6 @@
 #include "StreamPacket.hpp"
 #include <cassert>
+#include <utility>
 
 namespace Capt {
     StreamPacket::StreamPacket(std::istream& stream, PacketHeader header) noexcept

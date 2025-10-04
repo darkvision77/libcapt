@@ -1,13 +1,14 @@
 #include "BasicCaptPrinter.hpp"
 #include "UnexpectedBehaviourError.hpp"
 #include "Protocol/Enums.hpp"
-#include "Protocol/ExtendedStatus.hpp"
-#include "Protocol/PageParams.hpp"
 #include "Protocol/Protocol.hpp"
 #include <iomanip>
 #include <cassert>
 #include <sstream>
 #include <vector>
+#include <cstdint>
+#include <span>
+#include <string_view>
 
 namespace Capt {
     #define CHECK_RETCODE(EXP) checkRetcode(EXP, #EXP)

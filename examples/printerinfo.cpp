@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <cstdint>
+#include <span>
 
 using namespace Capt;
 

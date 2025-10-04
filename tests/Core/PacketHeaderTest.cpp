@@ -2,6 +2,11 @@
 #include "MemoryStream.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdint>
+#include <cstddef>
+#include <span>
+#include <stdexcept>
+#include <vector>
 
 using testing::ElementsAreArray;
 using testing::ElementsAre;

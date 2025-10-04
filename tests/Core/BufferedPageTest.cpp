@@ -4,6 +4,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <ios>
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 using namespace Capt;
 

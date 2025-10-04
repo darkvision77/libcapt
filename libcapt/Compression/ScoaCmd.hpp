@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <span>
+#include <cstddef>
 
 namespace Capt::Compression::ScoaCmd {
     constexpr inline uint8_t RepeatXByte = 0x43;

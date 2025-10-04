@@ -1,9 +1,11 @@
 #include "ScoaStreambuf.hpp"
 #include "ScoaState.hpp"
 #include "ScoaCmd.hpp"
+#include "ScoaFunc.hpp"
 #include <cassert>
 #include <iostream>
 #include <span>
+#include <algorithm>
 
 namespace Capt::Compression {
     using int_type = ScoaStreambuf::int_type;

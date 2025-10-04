@@ -3,7 +3,11 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstddef>
 #include <span>
+#include <utility>
+#include <array>
+#include <ostream>
 #include "PacketHeader.hpp"
 
 namespace Capt {

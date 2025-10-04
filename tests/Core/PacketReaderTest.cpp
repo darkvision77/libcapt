@@ -1,6 +1,9 @@
 #include "libcapt/Core/PacketReader.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdint>
+#include <span>
+#include <stdexcept>
 
 using namespace Capt;
 

@@ -3,6 +3,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <streambuf>
+#include <cstdint>
+#include <cstddef>
+#include <vector>
 
 using namespace Capt;
 

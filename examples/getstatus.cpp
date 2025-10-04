@@ -3,6 +3,7 @@
 #include "libcapt/Protocol/ExtendedStatus.hpp"
 #include "libcapt/Protocol/Protocol.hpp"
 #include <iostream>
+#include <cstdio>
 
 using namespace Capt;
 

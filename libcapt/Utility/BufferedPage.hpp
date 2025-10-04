@@ -4,6 +4,8 @@
 #include "../Protocol/PageParams.hpp"
 #include <streambuf>
 #include <vector>
+#include <cstddef>
+#include <ios>
 
 namespace Capt::Utility {
     class BufferedPage : public std::streambuf {

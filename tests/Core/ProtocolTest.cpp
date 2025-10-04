@@ -8,6 +8,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <stdexcept>
+#include <cstdint>
+#include <span>
+#include <vector>
 
 using namespace Capt;
 

@@ -3,6 +3,11 @@
 #include "libcapt/Core/StreamPacket.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdint>
+#include <span>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 using namespace Capt;
 

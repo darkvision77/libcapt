@@ -2,6 +2,13 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cassert>
+#include <cstddef>
+#include <ostream>
+#include <span>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 using namespace Capt::Compression;
 

@@ -2,7 +2,7 @@
 #define _LIBCAPT_COMPRESSION_SCOA_STREAMBUF_HPP_
 
 #include <iostream>
-#include <streambuf>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

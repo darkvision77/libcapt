@@ -9,6 +9,7 @@
 #include <optional>
 #include <stop_token>
 #include <thread>
+#include <cstddef>
 
 namespace Capt {
     class BasicCaptPrinter {
@@ -30,7 +31,7 @@ namespace Capt {
         // If blockSize is zero, it will be taken from PrinterInfo
         virtual bool WriteVideoData(std::stop_token stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0);
         inline virtual bool WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
-            return this->WriteVideoData(std::stop_token{}, params, videoStream, blockSize);
+            return this->WriteVideoData({}, params, videoStream, blockSize);
         }
 
         virtual void GoOffline();
@@ -51,7 +52,7 @@ namespace Capt {
 
         template<typename TFunc, typename Rep, typename Period>
         Protocol::ExtendedStatus WaitStatus(TFunc func, const std::chrono::duration<Rep, Period>& delay) {
-            return this->WaitStatus(std::stop_token{}, func, delay).value();
+            return this->WaitStatus({}, func, delay).value();
         }
 
         // nullopt if stop requested
@@ -62,7 +63,7 @@ namespace Capt {
         }
 
         inline virtual Protocol::ExtendedStatus WaitPrintEnd() {
-            return this->WaitPrintEnd(std::stop_token{}).value();
+            return this->WaitPrintEnd({}).value();
         }
     };
 }

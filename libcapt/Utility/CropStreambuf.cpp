@@ -1,7 +1,6 @@
 #include "CropStreambuf.hpp"
 #include <algorithm>
 #include <cassert>
-#include <ios>
 #include <streambuf>
 
 namespace Capt::Utility {

@@ -3,6 +3,9 @@
 #include "MemoryStream.hpp"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cstdint>
+#include <ostream>
+#include <vector>
 
 using namespace Capt;
 

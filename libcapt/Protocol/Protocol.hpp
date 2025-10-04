@@ -1,7 +1,6 @@
 #ifndef _LIBCAPT_PROTOCOL_PROTOCOL_HPP_
 #define _LIBCAPT_PROTOCOL_PROTOCOL_HPP_
 
-#include "Enums.hpp"
 #include "ExtendedStatus.hpp"
 #include "PageParams.hpp"
 #include "PrinterInfo.hpp"

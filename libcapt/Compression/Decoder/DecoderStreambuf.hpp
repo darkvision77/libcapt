@@ -2,7 +2,7 @@
 #define _LIBCAPT_COMPRESSION_DECODER_DECODER_STREAMBUF_HPP_
 
 #include <ostream>
-#include <streambuf>
+#include <cstddef>
 #include <vector>
 #include <cstdint>
 

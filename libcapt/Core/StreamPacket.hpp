@@ -6,6 +6,10 @@
 #include <cassert>
 #include <concepts>
 #include <istream>
+#include <cstdint>
+#include <cstddef>
+#include <span>
+#include <stdexcept>
 
 namespace Capt {
     class StreamPacket {

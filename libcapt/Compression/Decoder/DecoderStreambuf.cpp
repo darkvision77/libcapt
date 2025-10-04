@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sstream>
-#include <streambuf>
+#include <string_view>
 
 namespace Capt::Compression {
     #define CLOG(STR) if (this->commandLog) *this->commandLog << STR
