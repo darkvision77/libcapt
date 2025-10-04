@@ -1,3 +1,0 @@
-headers += files(
-    'Integer.hpp',
-)

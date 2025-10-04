@@ -34,8 +34,8 @@ check out [mounaiban/captdriver](https://github.com/mounaiban/captdriver) (early
 Also, the [`examples`](examples) folder contains an example program for printing PBM files. \
 Keep in mind that this program does not implement all the features and is used only for printing testing.
 ```sh
-meson setup build -Dexamples=enabled
-meson compile -v -C build
+cmake -S. -B build -DBUILD_EXAMPLES=ON
+cmake --build build
 ./build/examples/printpbm /dev/usb/lp0 ./examples/data/example-1.pbm
 ```
 To rasterize PDF files into PBM, you can use the [`pdf2pbm.sh`](scripts/pdf2pbm.sh) script. \
@@ -44,13 +44,14 @@ Also, you can find some test PBM files in the [`examples/data`](examples/data) f
 ## Testing
 Compression testing requires GDB, Ghostscript and the [Poppler](https://poppler.freedesktop.org/) package (provides `pdfseparate` and `pdfinfo`).
 ```sh
-meson setup build -Dtests=enabled -Dcompression_tests=enabled
-meson test -v -C build
+cmake -S. -B build -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=ON
+cmake --build build
+ctest --test-dir build
 ```
 This will run core tests and the compression tests, which include the `compressor` and `decoder` suites.
 
 Compression test files are located at [`tests/Compression/data`](tests/Compression/data).
-If you are adding your own files, don't forget to add them into the [`meson.build`](tests/Compression/meson.build) file.
+If you are adding your own files, don't forget to add them into the [`CMakeLists.txt`](tests/Compression/CMakeLists.txt) file.
 
 ## Decoder verification
 The correct operation of the compressor can be verified using the decoder. \

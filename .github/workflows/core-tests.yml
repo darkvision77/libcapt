@@ -18,24 +18,16 @@ jobs:
       - name: Install apt packages
         run: |
           sudo apt-get update -y --fix-missing
-          sudo apt-get install -y python3-pip gcc pkg-config ninja-build
-
-      - name: Install meson
-        run: sudo pip3 install --upgrade meson
-
-      - name: Install gtest
-        run: |
-          mkdir -p subprojects
-          meson wrap install gtest
+          sudo apt-get install -y cmake gcc pkg-config ninja-build
 
       - name: Configure
-        run: meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled
+        run: cmake -G Ninja -S. -B build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
 
       - name: Compile
-        run: meson compile -v -C build
+        run: cmake --build build -v -j
 
       - name: Run tests
-        run: meson test --print-errorlogs -C build --suite=core
+        run: ctest --test-dir build --output-on-failure -j
 
   Debian:
     needs: Ubuntu
@@ -58,11 +50,10 @@ jobs:
           set -eou pipefail
           export GITHUB_ACTIONS=true
           apt-get update -y --fix-missing
-          apt-get install -y python3-pip gcc libgtest-dev libgmock-dev pkg-config ninja-build
-          pip3 install --break-system-packages --upgrade meson
-          meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled
-          meson compile -v -C build
-          meson test --print-errorlogs -C build --suite=core
+          apt-get install -y build-essential libgtest-dev libgmock-dev pkg-config ninja-build cmake
+          cmake -G Ninja -S. -B build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+          cmake --build build -v -j
+          ctest --test-dir build --output-on-failure -j
           "
 
   FreeBSD:
@@ -71,6 +62,7 @@ jobs:
       fail-fast: false
       matrix:
         release:
+          - "13.5"
           - "14.3"
     defaults:
       run:
@@ -85,17 +77,17 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           release: ${{ matrix.release }}
-          prepare: pkg install -y meson googletest pkgconf llvm-devel
+          prepare: pkg install -y cmake googletest pkgconf llvm-devel ninja
           envs: 'GITHUB_ACTIONS'
 
       - name: Configure
-        run: cd $GITHUB_WORKSPACE && meson setup build -Db_sanitize=address,undefined -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled -Dcpp_args="-fexperimental-library"
+        run: CXXFLAGS=-fexperimental-library cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
 
       - name: Compile
-        run: cd $GITHUB_WORKSPACE && meson compile -v -C build
+        run: cmake --build $GITHUB_WORKSPACE/build -v -j
 
       - name: Run tests
-        run: cd $GITHUB_WORKSPACE && meson test --print-errorlogs -C build --suite=core
+        run: ctest --test-dir $GITHUB_WORKSPACE/build --output-on-failure -j
 
   Alpine:
     needs: Ubuntu
@@ -125,13 +117,13 @@ jobs:
           branch: v3.22
           arch: ${{ matrix.arch }}
           packages: >
-            pkgconf build-base meson samurai gtest-dev gmock
+            pkgconf build-base cmake samurai gtest-dev gmock
 
       - name: Configure
-        run: meson setup build -Dexamples=enabled -Dtests=enabled -Dcompression_tests=disabled
+        run: cmake -G Ninja -S. -B build -DSANITIZE=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
 
       - name: Compile
-        run: meson compile -v -C build
+        run: cmake --build build -v -j
 
       - name: Run tests
-        run: meson test --print-errorlogs -C build --suite=core
+        run: ctest --test-dir build --output-on-failure -j
