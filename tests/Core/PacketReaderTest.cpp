@@ -75,12 +75,15 @@ TEST(PacketReaderTest, ReadBytes) {
 }
 
 TEST(PacketReaderTest, ReadBytesEOF) {
-    EXPECT_THROW({
-        uint8_t payload[] = {0};
+    {
+        uint8_t payload[] = {0x12};
         PacketReader reader(payload);
-        reader.ReadBytes(1);
-        reader.ReadBytes(1);
-    }, std::out_of_range);
+        ASSERT_THAT(reader.ReadBytes(1), testing::ElementsAre(0x12));
+        ASSERT_EQ(reader.ReadBytes(0).size(), 0);
+        EXPECT_THROW({
+            reader.ReadBytes(1);
+        }, std::out_of_range);
+    }
 
     EXPECT_THROW({
         uint8_t payload[] = {0};
