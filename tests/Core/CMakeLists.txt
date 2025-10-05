@@ -1,6 +1,7 @@
 find_package(GTest)
 if(NOT GTest_FOUND)
     message(STATUS "GTest not found, using FetchContent")
+    set(INSTALL_GTEST OFF)
     include(FetchContent)
     FetchContent_Declare(
         googletest
