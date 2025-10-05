@@ -5,9 +5,6 @@ target_include_directories(libcapt PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR
 
 target_sources(
     libcapt
-    PRIVATE
-    BasicCaptPrinter.cpp
-
     PUBLIC
     BasicCaptPrinter.hpp
     UnexpectedBehaviourError.hpp

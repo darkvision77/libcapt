@@ -81,7 +81,7 @@ jobs:
           envs: 'GITHUB_ACTIONS'
 
       - name: Configure
-        run: CXXFLAGS=-fexperimental-library cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
 
       - name: Compile
         run: cmake --build $GITHUB_WORKSPACE/build -v -j
