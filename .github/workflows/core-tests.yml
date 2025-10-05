@@ -62,7 +62,6 @@ jobs:
       fail-fast: false
       matrix:
         release:
-          - "13.5"
           - "14.3"
     defaults:
       run:
@@ -82,6 +81,38 @@ jobs:
 
       - name: Configure
         run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+
+      - name: Compile
+        run: cmake --build $GITHUB_WORKSPACE/build -v -j
+
+      - name: Run tests
+        run: ctest --test-dir $GITHUB_WORKSPACE/build --output-on-failure -j
+
+  OpenBSD:
+    needs: Ubuntu
+    strategy:
+      fail-fast: false
+      matrix:
+        release:
+          - "7.7"
+    defaults:
+      run:
+        shell: openbsd {0}
+    name: OpenBSD ${{ matrix.release }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run OpenBSD VM
+        uses: vmactions/openbsd-vm@v1
+        with:
+          release: ${{ matrix.release }}
+          prepare: pkg_add cmake gtest pkgconf llvm ninja
+          envs: 'GITHUB_ACTIONS'
+
+      - name: Configure
+        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
 
       - name: Compile
         run: cmake --build $GITHUB_WORKSPACE/build -v -j
