@@ -1,4 +1,5 @@
 #include "PacketReader.hpp"
+#include <cstddef>
 #include <iterator>
 #include <stdexcept>
 
@@ -30,7 +31,8 @@ namespace Capt {
     }
 
     std::span<const uint8_t> PacketReader::ReadBytes(std::size_t count) {
-        if (std::distance(this->iter, this->payload.end()) < count) {
+        auto dist = std::distance(this->iter, this->payload.end());
+        if (dist < 0 || static_cast<std::size_t>(dist) < count) {
             throw std::out_of_range("packet payload EOF");
         }
         this->iter += count;
