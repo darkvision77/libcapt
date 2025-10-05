@@ -8,14 +8,14 @@
 
 class MemoryStreambuf : public std::streambuf {
 private:
-	int_type overflow(int_type c = traits_type::eof()) override {
+    int_type overflow(int_type c = traits_type::eof()) override {
         if (!traits_type::eq_int_type(c, traits_type::eof())){
             this->Buffer.push_back(traits_type::to_char_type(c));
         }
         return traits_type::not_eof(c);
     }
 
-	int_type underflow() override {
+    int_type underflow() override {
         if (this->Buffer.empty()) {
             return traits_type::eof();
         }
@@ -30,9 +30,9 @@ private:
         return val;
     }
 public:
-	std::vector<uint8_t> Buffer;
+    std::vector<uint8_t> Buffer;
 
-	MemoryStreambuf() = default;
+    MemoryStreambuf() = default;
 };
 
 class MemoryStream : public std::iostream {
