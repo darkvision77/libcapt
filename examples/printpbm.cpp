@@ -32,8 +32,10 @@ public:
     }
 
     bool request_stop() noexcept {
-        this->stopReq.store(true);
-        return true;
+        if (!this->stopReq.exchange(true)) {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -45,7 +47,10 @@ public:
     explicit DummyStopToken(DummyStopSource& src) noexcept : src(&src) {}
 
     bool stop_requested() const noexcept {
-        return this->src == nullptr || this->src->stop_requested();
+        if (this->src == nullptr) {
+            return false;
+        }
+        return this->src->stop_requested();
     }
 };
 
