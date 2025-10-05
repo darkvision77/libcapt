@@ -1,3 +1,6 @@
+find_program(PDFSEPARATE NAMES pdfseparate REQUIRED)
+find_program(BASH NAMES bash REQUIRED)
+
 add_executable(compressor compressor.cpp)
 target_link_libraries(compressor libcapt)
 
@@ -6,21 +9,21 @@ target_link_libraries(decoder libcapt)
 
 set(
     PBM_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/data/randA.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/randB.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/randC.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/randD.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/randE.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/randF.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/empty.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/black-1.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/repx-1.pbm
-    ${CMAKE_CURRENT_LIST_DIR}/data/textA.pbm
+    "${CMAKE_CURRENT_LIST_DIR}/data/randA.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/randB.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/randC.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/randD.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/randE.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/randF.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/empty.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/black-1.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/repx-1.pbm"
+    "${CMAKE_CURRENT_LIST_DIR}/data/textA.pbm"
 )
 
 set(
     PDF_RAW_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/data/stm32g030f6.pdf
+    "${CMAKE_CURRENT_LIST_DIR}/data/stm32g030f6.pdf"
 )
 
 set(DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/data")
@@ -32,7 +35,7 @@ foreach(pdf ${PDF_RAW_FILES})
     get_filename_component(filename "${pdf}" NAME_WE)
     message(STATUS "Separating ${filename}.pdf to ${PDF_SEP_DIR}")
     execute_process(
-        COMMAND pdfseparate "${pdf}" "${PDF_SEP_DIR}/${filename}-page%04d.pdf"
+        COMMAND "${PDFSEPARATE}" "${pdf}" "${PDF_SEP_DIR}/${filename}-page%04d.pdf"
         COMMAND_ERROR_IS_FATAL ANY
         OUTPUT_QUIET ERROR_QUIET
     )
@@ -72,7 +75,7 @@ foreach(pbm ${PBM_FILES} ${PDF_RASTERIZED})
     set(decpbm "${DATA_DIR}/${filename}-decoded.pbm")
     add_test(
         NAME "DecoderTest.${filename}"
-        COMMAND sh -c "'$<TARGET_FILE:decoder>' '${filterbin}' '${decpbm}' '${declog}' && cmp '${filterlog}' '${declog}' && cmp '${pbm}' '${decpbm}'"
+        COMMAND "${BASH}" -c "'$<TARGET_FILE:decoder>' '${filterbin}' '${decpbm}' '${declog}' && cmp '${filterlog}' '${declog}' && cmp '${pbm}' '${decpbm}'"
     )
     set_tests_properties(
         "DecoderTest.${filename}"
@@ -84,7 +87,7 @@ foreach(pbm ${PBM_FILES} ${PDF_RASTERIZED})
 
     add_test(
         NAME "CompressorTest.${filename}"
-        COMMAND bash -c "cmp '${pbm}' <('$<TARGET_FILE:decoder>' <('$<TARGET_FILE:compressor>' '${pbm}' /dev/stdout) /dev/stdout /dev/null)"
+        COMMAND "${BASH}" -c "cmp '${pbm}' <('$<TARGET_FILE:decoder>' <('$<TARGET_FILE:compressor>' '${pbm}' /dev/stdout) /dev/stdout /dev/null)"
     )
     set_tests_properties(
         "CompressorTest.${filename}"

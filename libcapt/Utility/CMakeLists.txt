@@ -3,9 +3,4 @@ target_sources(
     PRIVATE
     BufferedPage.cpp
     CropStreambuf.cpp
-
-    PUBLIC
-    BufferedPage.hpp
-    Crop.hpp
-    CropStreambuf.hpp
 )

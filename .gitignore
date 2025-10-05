@@ -3,6 +3,8 @@ build/
 __pycache__/
 .vscode/
 
+libcapt/Version.hpp
+
 # Prerequisites
 *.d
 

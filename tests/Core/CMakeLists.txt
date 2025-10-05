@@ -1,5 +1,4 @@
 find_package(GTest)
-
 if(NOT GTest_FOUND)
     message(STATUS "GTest not found, using FetchContent")
     include(FetchContent)

@@ -12,7 +12,7 @@ jobs:
       - name: Install apt packages
         run: |
           sudo apt-get update -y --fix-missing
-          sudo apt-get install -y cmake gcc pkg-config ninja-build poppler-utils gdb ghostscript libgtest-dev libgmock-dev
+          sudo apt-get install -y cmake gcc ninja-build poppler-utils gdb ghostscript libgtest-dev libgmock-dev
 
       - name: Install captfilter deps
         run: |
@@ -21,7 +21,7 @@ jobs:
           sudo apt-get install libpopt0:i386
 
       - name: Configure
-        run: cmake -G Ninja -S. -B build -DSANITIZE=ON -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=ON
+        run: cmake -G Ninja -S. -B build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_TESTS=ON -DLIBCAPT_COMPRESSION_TESTS=ON
 
       - name: Compile
         run: cmake --build build -v -j

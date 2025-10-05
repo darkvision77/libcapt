@@ -18,10 +18,10 @@ jobs:
       - name: Install apt packages
         run: |
           sudo apt-get update -y --fix-missing
-          sudo apt-get install -y cmake gcc pkg-config ninja-build
+          sudo apt-get install -y cmake gcc ninja-build
 
       - name: Configure
-        run: cmake -G Ninja -S. -B build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -G Ninja -S. -B build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
 
       - name: Compile
         run: cmake --build build -v -j
@@ -50,8 +50,8 @@ jobs:
           set -eou pipefail
           export GITHUB_ACTIONS=true
           apt-get update -y --fix-missing
-          apt-get install -y build-essential libgtest-dev libgmock-dev pkg-config ninja-build cmake
-          cmake -G Ninja -S. -B build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+          apt-get install -y build-essential libgtest-dev libgmock-dev ninja-build cmake
+          cmake -G Ninja -S. -B build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
           cmake --build build -v -j
           ctest --test-dir build --output-on-failure -j
           "
@@ -76,11 +76,11 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           release: ${{ matrix.release }}
-          prepare: pkg install -y cmake googletest pkgconf llvm-devel ninja
+          prepare: pkg install -y cmake googletest llvm-devel ninja
           envs: 'GITHUB_ACTIONS'
 
       - name: Configure
-        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
 
       - name: Compile
         run: cmake --build $GITHUB_WORKSPACE/build -v -j
@@ -108,11 +108,11 @@ jobs:
         uses: vmactions/openbsd-vm@v1
         with:
           release: ${{ matrix.release }}
-          prepare: pkg_add cmake gtest pkgconf llvm ninja
+          prepare: pkg_add cmake gtest llvm ninja
           envs: 'GITHUB_ACTIONS'
 
       - name: Configure
-        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DSANITIZE=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -G Ninja -S $GITHUB_WORKSPACE -B $GITHUB_WORKSPACE/build -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
 
       - name: Compile
         run: cmake --build $GITHUB_WORKSPACE/build -v -j
@@ -148,10 +148,10 @@ jobs:
           branch: v3.22
           arch: ${{ matrix.arch }}
           packages: >
-            pkgconf build-base cmake samurai gtest-dev gmock
+            build-base cmake samurai gtest-dev gmock
 
       - name: Configure
-        run: cmake -G Ninja -S. -B build -DSANITIZE=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -G Ninja -S. -B build -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
 
       - name: Compile
         run: cmake --build build -v -j
@@ -176,7 +176,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -S. -B build -DSANITIZE=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=OFF
+        run: cmake -S. -B build -DLIBCAPT_BUILD_EXAMPLES=ON -DLIBCAPT_BUILD_TESTS=ON
 
       - name: Compile
         run: cmake --build build -v -j

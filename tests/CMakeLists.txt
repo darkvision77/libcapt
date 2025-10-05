@@ -1,5 +1,5 @@
 add_subdirectory(Core)
 
-if(COMPRESSION_TESTS)
+if(LIBCAPT_COMPRESSION_TESTS)
     add_subdirectory(Compression)
 endif()
