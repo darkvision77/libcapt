@@ -6,10 +6,6 @@
 #include <concepts>
 #include <istream>
 
-#ifndef HAVE_BYTESWAP
-#error HAVE_BYTESWAP must be defined
-#endif
-
 #if !HAVE_BYTESWAP
 #include <cstdint>
 #endif
