@@ -3,9 +3,11 @@ find_program(BASH NAMES bash REQUIRED)
 
 add_executable(compressor compressor.cpp)
 target_link_libraries(compressor libcapt)
+target_include_directories(compressor PRIVATE $<TARGET_PROPERTY:libcapt,INCLUDE_DIRECTORIES>)
 
 add_executable(decoder decoder.cpp)
 target_link_libraries(decoder libcapt)
+target_include_directories(decoder PRIVATE $<TARGET_PROPERTY:libcapt,INCLUDE_DIRECTORIES>)
 
 set(
     PBM_FILES
