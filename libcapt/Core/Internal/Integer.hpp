@@ -1,14 +1,22 @@
 #ifndef _LIBCAPT_CORE_INTERNAL_INTEGER_HPP_
 #define _LIBCAPT_CORE_INTERNAL_INTEGER_HPP_
 
+#include "Config.hpp"
 #include <bit>
 #include <concepts>
 #include <istream>
+
+#ifndef HAVE_BYTESWAP
+#error HAVE_BYTESWAP must be defined
+#endif
+
+#if !HAVE_BYTESWAP
 #include <cstdint>
+#endif
 
 namespace Capt::Internal {
     namespace impl {
-        #if defined(__GNUC__) && __GNUC__ < 12
+        #if !HAVE_BYTESWAP
         constexpr uint16_t bswap(uint16_t value) noexcept { return __builtin_bswap16(value); }
         constexpr uint32_t bswap(uint32_t value) noexcept { return __builtin_bswap32(value); }
         constexpr uint64_t bswap(uint64_t value) noexcept { return __builtin_bswap64(value); }

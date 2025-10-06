@@ -1,4 +1,18 @@
-configure_file(Version.hpp.in "${CMAKE_CURRENT_SOURCE_DIR}/Version.hpp" @ONLY)
+include(CheckCXXSourceCompiles)
+
+check_cxx_source_compiles("
+#include <bit>
+int main() {
+    std::byteswap(123);
+    return 0;
+}
+" HAVE_BYTESWAP)
+
+if(NOT HAVE_BYTESWAP)
+    set(HAVE_BYTESWAP 0)
+endif()
+
+configure_file(Config.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/Config.hpp @ONLY)
 
 add_library(libcapt)
 add_library(libcapt::libcapt ALIAS libcapt)
