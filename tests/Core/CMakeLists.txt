@@ -28,5 +28,6 @@ set(
 foreach(file ${TEST_FILES})
     add_executable(${file} ${file}.cpp)
     target_link_libraries(${file} PRIVATE GTest::gtest_main GTest::gmock libcapt)
+    target_include_directories(${file} PRIVATE $<TARGET_PROPERTY:libcapt,INCLUDE_DIRECTORIES>)
     gtest_discover_tests(${file})
 endforeach()
