@@ -30,8 +30,8 @@ set(
 
 set(DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/data")
 set(PDF_SEP_DIR "${DATA_DIR}/pdf")
-make_directory("${DATA_DIR}")
-make_directory("${PDF_SEP_DIR}")
+file(MAKE_DIRECTORY "${DATA_DIR}")
+file(MAKE_DIRECTORY "${PDF_SEP_DIR}")
 
 foreach(pdf ${PDF_RAW_FILES})
     get_filename_component(filename "${pdf}" NAME_WE)
