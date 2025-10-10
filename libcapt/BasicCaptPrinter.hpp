@@ -98,6 +98,7 @@ namespace Capt {
             }
             assert((blockSize + 4) <= UINT16_MAX);
 
+            CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
             Protocol::IC_BEGIN_PAGE(this->stream, params);
             Protocol::IC_BEGIN_DATA(this->stream);
             std::vector<uint8_t> buffer(blockSize);
