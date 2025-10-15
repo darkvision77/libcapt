@@ -14,44 +14,64 @@ Implementation of the Canon CAPT v1 protocol and SCoA compression based on rever
 ## Target devices
 Currently, the target devices are printers with `CNTblModel = 0` (see Canon's driver PPD).
 
-| Model   | Cartridge     | Throughput, ppm (A4) | Max Resolution | Year (approx.) |
-|---------|---------------|----------------------|----------------|----------------|
-| LBP800  | EP-22         | 8                    | 600 dpi        | 1999-2001      |
-| LBP810  | EP-22         | 8                    | 600 dpi        | 2001-2002      |
-| LBP1120 | EP-22         | 10                   | 600 dpi        | 2003-2004      |
-| LBP1210 | EP-25         | 14                   | 600 dpi        | ~2002          |
-| LBP3200 | EP-26/EP-27   | 18                   | 600 dpi        | 2004-2006      |
+| Model   | Cartridge     | PPM (A4) | Max Resolution | Year (approx.) |
+|---------|---------------|----------|----------------|----------------|
+| LBP800  | EP-22         | 8        | 600 dpi        | 1999-2001      |
+| LBP810  | EP-22         | 8        | 600 dpi        | 2001-2002      |
+| LBP1120 | EP-22         | 10       | 600 dpi        | 2003-2004      |
+| LBP1210 | EP-25         | 14       | 600 dpi        | ~2002          |
+| LBP3200 | EP-26/EP-27   | 18       | 600 dpi        | 2004-2006      |
+
+## Compilation
+```sh
+cmake -S. -B build
+cmake --build build
+```
+### Dependencies
+#### Compile-time
+- gcc >= 11 or clang >= 16 or MSVC (tested on 19.44.35217.0)
+- cmake >= 3.21
+
+#### Testing
+- gtest (+gmock)
+
+##### For compression tests:
+- gdb
+- ghostscript
+- poppler-utils (`pdfseparate`, `pdfinfo`, etc.)
+- captfilter deps (`libpopt0:i386` on Debian)
+
+## Testing
+### Core tests
+```sh
+cmake -S. -B build -DLIBCAPT_BUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build
+```
+### Compression tests
+```sh
+cmake -S. -B build -DLIBCAPT_BUILD_TESTS=ON -DLIBCAPT_COMPRESSION_TESTS=ON
+cmake --build build
+ctest --test-dir build
+```
+Compression test files are located at [`tests/Compression/data`](tests/Compression/data).
+If you are adding your own files, don't forget to add them into the [`CMakeLists.txt`](tests/Compression/CMakeLists.txt) file.
 
 ## Usage
-Currently, there are no drivers that use libcapt.
-
-If you are tired of the original driver or want to seamlessly use
-your Canon LBP printer on other devices, you can use [UoWPrint](https://printserver.ink/).
-
-If you want to use an open source CUPS driver for the newer Canon LBP models,
-check out [mounaiban/captdriver](https://github.com/mounaiban/captdriver) (early alpha stage).
+There are several options if you want to print on your Canon LBP printer (except for the original driver):
+- [darkvision77/captppd](https://github.com/darkvision77/captppd) — CUPS driver based on libcapt (CAPTv1 only)
+- [UoWPrint](https://printserver.ink/) — print server that supports all Canon LBP models (and other printers)
+- [mounaiban/captdriver](https://github.com/mounaiban/captdriver) — CUPS driver for the newer Canon LBP models (early alpha stage)
 
 Also, the [`examples`](examples) folder contains an example program for printing PBM files. \
 Keep in mind that this program does not implement all the features and is used only for printing testing.
 ```sh
-cmake -S. -B build -DBUILD_EXAMPLES=ON
+cmake -S. -B build -DLIBCAPT_BUILD_EXAMPLES=ON
 cmake --build build
 ./build/examples/printpbm /dev/usb/lp0 ./examples/data/example-1.pbm
 ```
 To rasterize PDF files into PBM, you can use the [`pdf2pbm.sh`](scripts/pdf2pbm.sh) script. \
 Also, you can find some test PBM files in the [`examples/data`](examples/data) folder.
-
-## Testing
-Compression testing requires GDB, Ghostscript and the [Poppler](https://poppler.freedesktop.org/) package (provides `pdfseparate` and `pdfinfo`).
-```sh
-cmake -S. -B build -DBUILD_TESTS=ON -DCOMPRESSION_TESTS=ON
-cmake --build build
-ctest --test-dir build
-```
-This will run core tests and the compression tests, which include the `compressor` and `decoder` suites.
-
-Compression test files are located at [`tests/Compression/data`](tests/Compression/data).
-If you are adding your own files, don't forget to add them into the [`CMakeLists.txt`](tests/Compression/CMakeLists.txt) file.
 
 ## Decoder verification
 The correct operation of the compressor can be verified using the decoder. \
