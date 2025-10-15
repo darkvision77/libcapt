@@ -25,8 +25,8 @@ namespace Capt::Protocol {
             .AppendUint16(0) // const uint16
             .AppendUint16(0x03fc) // TargetModel
             .AppendByte(params.PaperSize)
-            .AppendByte(0) // const byte
-            .AppendByte(0) // InputSlot = auto
+            .AppendByte(1) // const zero in captfilter, captmon makes it |= 1
+            .AppendByte(1) // InputSlot: const zero in captfilter, const 1 in captmon
             .AppendByte(0) // const byte
             .AppendByte(params.TonerDensity)
             .AppendByte(params.TonerDensity)

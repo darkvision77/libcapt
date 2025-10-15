@@ -54,8 +54,8 @@ TEST_F(ProtocolTest, IC_BEGIN_PAGE) {
         0, 0, // const uint16
         0xfc, 0x03, // TargetModel
         7, // PaperSize
-        0, // const byte
-        0, // InputSlot
+        1, // const byte
+        1, // InputSlot
         0, // const byte
         0x1f, // Color1
         0x1f, // Color2
@@ -98,8 +98,8 @@ TEST_F(ProtocolTest, IC_BEGIN_PAGE) {
         0, 0, // const uint16
         0xfc, 0x03, // TargetModel
         7, // PaperSize
-        0, // const byte
-        0, // InputSlot
+        1, // const byte
+        1, // InputSlot
         0, // const byte
         0x1f, // Color1
         0x1f, // Color2
