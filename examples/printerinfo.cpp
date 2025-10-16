@@ -64,7 +64,10 @@ int main(int argc, char* argv[]) {
     Protocol::PrinterInfo info = Protocol::PC_GET_PRINTER_INFO(printerStream);
     printPrinterInfo(info);
 
-    assert(Protocol::PC_RESERVE_UNIT(printerStream) == 0);
+    if (Protocol::PC_RESERVE_UNIT(printerStream) != 0) {
+        std::puts("Failed to reserve unit");
+        return 1;
+    }
     std::puts("Unit reserved");
 
     Protocol::PCR_CLEAR_ERROR(printerStream);

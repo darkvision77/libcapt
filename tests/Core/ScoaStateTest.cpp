@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <cassert>
 #include <cstddef>
 #include <ostream>
 #include <span>
@@ -30,8 +29,7 @@ namespace Capt::Compression {
     }
 }
 
-static std::vector<ScoaFunc> processLine(ScoaState& state, std::span<const uint8_t> line, std::span<const uint8_t> prevLine) {
-    std::vector<ScoaFunc> funcs;
+static void processLine(std::vector<ScoaFunc>& funcs, ScoaState& state, std::span<const uint8_t> line, std::span<const uint8_t> prevLine) {
     while (!state.Empty()) {
         ScoaFunc f = state.Get();
         funcs.push_back(f);
@@ -40,26 +38,24 @@ static std::vector<ScoaFunc> processLine(ScoaState& state, std::span<const uint8
     std::size_t count = 0;
     std::size_t index = 0;
     for (const ScoaFunc& f : funcs) {
-        assert(f.Count != 0);
+        ASSERT_NE(f.Count, 0);
         count += f.Count;
-        assert(index == f.Index);
+        ASSERT_EQ(index, f.Index);
         index = f.Index + f.Count;
         auto payload = f.Payload(line);
-        assert(payload.size() == f.Count);
+        ASSERT_EQ(payload.size(), f.Count);
         if (f.Type == ScoaFuncType::Repeat) {
-            assert(f.Count >= 2);
+            ASSERT_GE(f.Count, 2);
             for (std::size_t i = 0; i < f.Count; i++) {
-                assert(payload[i] == line[f.Index]);
+                ASSERT_EQ(payload[i], line[f.Index]);
             }
         } else if (f.Type == ScoaFuncType::Copy) {
             for (std::size_t i = 0; i < f.Count; i++) {
-                assert(payload[i] == prevLine[f.Index + i]);
+                ASSERT_EQ(payload[i], prevLine[f.Index + i]);
             }
         }
     }
-    assert(count == line.size());
-
-    return funcs;
+    ASSERT_EQ(count, line.size());
 }
 
 TEST(ScoaStateTest, SingleLine) {
@@ -104,7 +100,8 @@ TEST(ScoaStateTest, SingleLine) {
 
     for (std::size_t i = 0; i < cases.size(); i++) {
         ScoaState state(cases[i].first, {});
-        std::vector<ScoaFunc> funcs = processLine(state, cases[i].first, {});
+        std::vector<ScoaFunc> funcs;
+        processLine(funcs, state, cases[i].first, {});
         EXPECT_THAT(funcs, testing::ElementsAreArray(cases[i].second)) << "failed case #" << i;
     }
 }
@@ -161,7 +158,8 @@ TEST(ScoaStateTest, MultiLine) {
         for (std::size_t j = 0; j < cases[i].first.size(); j++) {
             auto prevLine = j != 0 ? cases[i].first[j - 1] : std::span<const uint8_t>{};
             ScoaState state(cases[i].first[j], prevLine);
-            std::vector<ScoaFunc> funcs = processLine(state, cases[i].first[j], prevLine);
+            std::vector<ScoaFunc> funcs;
+            processLine(funcs, state, cases[i].first[j], prevLine);
             EXPECT_THAT(funcs, testing::ElementsAreArray(cases[i].second[j])) << "failed case #" << i << " line #" << j;
         }
     }

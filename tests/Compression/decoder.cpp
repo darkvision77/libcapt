@@ -56,7 +56,9 @@ public:
         StreamPacket packet;
         while (this->stream >> packet) {
             if (packet.Header.Opcode == 0xD0A0) {
-                assert(packet.Header.PayloadSize >= 33);
+                if (packet.Header.PayloadSize < 33) {
+                    throw Compression::DecoderError("invalid packet size");
+                }
                 std::vector<uint8_t> payload(packet.Header.PayloadSize);
                 packet.ReadBytes(payload);
                 if (!this->stream.good()) {

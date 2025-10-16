@@ -94,7 +94,7 @@ foreach(pbm ${PBM_FILES} ${PDF_RASTERIZED})
     set_tests_properties(
         "CompressorTest.${filename}"
         PROPERTIES
-        REQUIRED_FILES "$<TARGET_FILE:compressor>;${pbm}"
+        REQUIRED_FILES "$<TARGET_FILE:decoder>;$<TARGET_FILE:compressor>;${pbm}"
         TIMEOUT 0
         LABELS "compression;compressor"
     )
