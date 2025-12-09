@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_COMPRESSION_SCOA_CMD_HPP_
-#define _LIBCAPT_COMPRESSION_SCOA_CMD_HPP_
-
+#pragma once
 #include <cstdint>
 #include <vector>
 #include <span>
@@ -24,5 +22,3 @@ namespace Capt::Compression::ScoaCmd {
     std::size_t EOL(std::vector<uint8_t>& buffer);
     std::size_t NOP(std::vector<uint8_t>& buffer);
 }
-
-#endif

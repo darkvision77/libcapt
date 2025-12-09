@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_TESTS_CORE_MEMORY_STREAM_HPP_
-#define _LIBCAPT_TESTS_CORE_MEMORY_STREAM_HPP_
-
+#pragma once
 #include <streambuf>
 #include <iostream>
 #include <vector>
@@ -48,5 +46,3 @@ public:
         return this->buf.Buffer;
     }
 };
-
-#endif

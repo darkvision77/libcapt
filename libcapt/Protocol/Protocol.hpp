@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_PROTOCOL_PROTOCOL_HPP_
-#define _LIBCAPT_PROTOCOL_PROTOCOL_HPP_
-
+#pragma once
 #include "ExtendedStatus.hpp"
 #include "PageParams.hpp"
 #include "PrinterInfo.hpp"
@@ -26,5 +24,3 @@ namespace Capt::Protocol {
     uint8_t PCR_CLEAR_MISPRINT(std::iostream& stream);
     uint8_t PCR_RESET_ENGINE(std::iostream& stream);
 }
-
-#endif

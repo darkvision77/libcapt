@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_CORE_PACKET_BUILDER_HPP_
-#define _LIBCAPT_CORE_PACKET_BUILDER_HPP_
-
+#pragma once
 #include <algorithm>
 #include <cstdint>
 #include <cstddef>
@@ -60,5 +58,3 @@ namespace Capt {
         }
     };
 }
-
-#endif

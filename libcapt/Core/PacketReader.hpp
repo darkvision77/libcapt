@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_CORE_PACKET_READER_HPP_
-#define _LIBCAPT_CORE_PACKET_READER_HPP_
-
+#pragma once
 #include <cstddef>
 #include <cstdint>
 #include <span>
@@ -19,5 +17,3 @@ namespace Capt {
         std::span<const uint8_t> ReadBytes(std::size_t count);
     };
 }
-
-#endif

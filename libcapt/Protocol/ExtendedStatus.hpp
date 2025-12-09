@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_PROTOCOL_EXTENDED_STATUS_HPP_
-#define _LIBCAPT_PROTOCOL_EXTENDED_STATUS_HPP_
-
+#pragma once
 #include "Enums.hpp"
 #include "ReprintStatus.hpp"
 #include <cstdint>
@@ -95,5 +93,3 @@ namespace Capt::Protocol {
 
     std::ostream& operator<<(std::ostream& os, const ExtendedStatus& status);
 }
-
-#endif

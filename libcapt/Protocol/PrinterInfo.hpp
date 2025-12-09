@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_PROTOCOL_PRINTER_INFO_HPP_
-#define _LIBCAPT_PROTOCOL_PRINTER_INFO_HPP_
-
+#pragma once
 #include <cstdint>
 
 namespace Capt::Protocol {
@@ -13,5 +11,3 @@ namespace Capt::Protocol {
         uint16_t Buffers;
     };
 }
-
-#endif

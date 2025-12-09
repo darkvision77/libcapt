@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_COMPRESSION_SCOA_STREAMBUF_HPP_
-#define _LIBCAPT_COMPRESSION_SCOA_STREAMBUF_HPP_
-
+#pragma once
 #include <iostream>
 #include <cstddef>
 #include <cstdint>
@@ -25,5 +23,3 @@ namespace Capt::Compression {
         void Reset(std::streambuf& rasterStream, unsigned lineSize, unsigned lines);
     };
 }
-
-#endif

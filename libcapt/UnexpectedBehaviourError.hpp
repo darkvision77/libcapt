@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_UNEXPECTED_BEHAVIOUR_ERROR_HPP_
-#define _LIBCAPT_UNEXPECTED_BEHAVIOUR_ERROR_HPP_
-
+#pragma once
 #include <stdexcept>
 
 namespace Capt {
@@ -8,5 +6,3 @@ namespace Capt {
         using std::runtime_error::runtime_error;
     };
 }
-
-#endif

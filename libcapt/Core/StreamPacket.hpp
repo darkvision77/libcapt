@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_CORE_STREAM_PACKET_HPP_
-#define _LIBCAPT_CORE_STREAM_PACKET_HPP_
-
+#pragma once
 #include "Internal/Integer.hpp"
 #include "PacketHeader.hpp"
 #include <cassert>
@@ -53,5 +51,3 @@ namespace Capt {
         friend std::istream& operator>>(std::istream& stream, StreamPacket& reader);
     };
 };
-
-#endif

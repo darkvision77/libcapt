@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_EXAMPLES_FILE_STREAMBUF_HPP_
-#define _LIBCAPT_EXAMPLES_FILE_STREAMBUF_HPP_
-
+#pragma once
 #include <streambuf>
 #include <cassert>
 #include <cstdio>
@@ -77,5 +75,3 @@ public:
         }
     }
 };
-
-#endif

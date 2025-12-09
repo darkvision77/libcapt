@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_CORE_INTERNAL_INTEGER_HPP_
-#define _LIBCAPT_CORE_INTERNAL_INTEGER_HPP_
-
+#pragma once
 #include "Config.hpp"
 #include <bit>
 #include <concepts>
@@ -26,7 +24,6 @@ namespace Capt::Internal {
 
     template<std::integral T>
     [[nodiscard]] constexpr T LittleToCpu(T value) noexcept {
-        static_assert(std::endian::native == std::endian::big || std::endian::native == std::endian::little);
         if constexpr (std::endian::native == std::endian::big) {
             return impl::bswap(value);
         } else {
@@ -53,5 +50,3 @@ namespace Capt::Internal {
         return stream;
     }
 }
-
-#endif

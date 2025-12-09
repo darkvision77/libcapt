@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_UTILITY_BUFFERED_PAGE_HPP_
-#define _LIBCAPT_UTILITY_BUFFERED_PAGE_HPP_
-
+#pragma once
 #include "../Protocol/PageParams.hpp"
 #include <streambuf>
 #include <vector>
@@ -31,5 +29,3 @@ namespace Capt::Utility {
         BufferedPage& operator=(BufferedPage&& other) noexcept;
     };
 }
-
-#endif

@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_UTILITY_CROP_HPP_
-#define _LIBCAPT_UTILITY_CROP_HPP_
-
+#pragma once
 #include <algorithm>
 #include <cstddef>
 
@@ -21,5 +19,3 @@ namespace Capt::Utility {
         return CropLinesCount(std::min(count, paperHeight));
     }
 }
-
-#endif

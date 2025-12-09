@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_COMPRESSION_SCOA_STATE_HPP_
-#define _LIBCAPT_COMPRESSION_SCOA_STATE_HPP_
-
+#pragma once
 #include "ScoaFunc.hpp"
 #include <cassert>
 #include <cstdint>
@@ -83,5 +81,3 @@ namespace Capt::Compression {
         }
     };
 }
-
-#endif

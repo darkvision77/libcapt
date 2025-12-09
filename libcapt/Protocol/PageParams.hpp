@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_PROTOCOL_PAGE_PARAMS_HPP_
-#define _LIBCAPT_PROTOCOL_PAGE_PARAMS_HPP_
-
+#pragma once
 #include <cstdint>
 
 namespace Capt::Protocol {
@@ -19,5 +17,3 @@ namespace Capt::Protocol {
         uint16_t PaperHeight;
     };
 }
-
-#endif

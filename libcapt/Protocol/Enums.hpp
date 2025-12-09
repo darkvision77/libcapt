@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_PROTOCOL_ENUMS_HPP_
-#define _LIBCAPT_PROTOCOL_ENUMS_HPP_
-
+#pragma once
 #include <cstdint>
 
 namespace Capt::Protocol {
@@ -47,5 +45,3 @@ namespace Capt::Protocol {
         MIS_PRINT_2    = 0x40,
     };
 }
-
-#endif

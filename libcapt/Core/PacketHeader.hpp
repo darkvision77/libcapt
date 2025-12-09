@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_CORE_PACKET_HEADER_HPP_
-#define _LIBCAPT_CORE_PACKET_HEADER_HPP_
-
+#pragma once
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -24,5 +22,3 @@ namespace Capt {
 
     std::istream& operator>>(std::istream& stream, PacketHeader& header);
 }
-
-#endif

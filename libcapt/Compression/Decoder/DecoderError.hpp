@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_COMPRESSION_DECODER_DECODER_ERROR_HPP_
-#define _LIBCAPT_COMPRESSION_DECODER_DECODER_ERROR_HPP_
-
+#pragma once
 #include <stdexcept>
 
 namespace Capt::Compression {
@@ -8,5 +6,3 @@ namespace Capt::Compression {
         using std::runtime_error::runtime_error;
     };
 }
-
-#endif

@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_UTILITY_CROP_STREAMBUF_HPP_
-#define _LIBCAPT_UTILITY_CROP_STREAMBUF_HPP_
-
+#pragma once
 #include <streambuf>
 
 namespace Capt::Utility {
@@ -24,5 +22,3 @@ namespace Capt::Utility {
         explicit CropStreambuf(std::streambuf& rasterStream, unsigned origLineSize, unsigned origLines, unsigned cropLineSize, unsigned cropLines) noexcept;
     };
 }
-
-#endif

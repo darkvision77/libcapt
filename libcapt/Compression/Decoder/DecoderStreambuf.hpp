@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_COMPRESSION_DECODER_DECODER_STREAMBUF_HPP_
-#define _LIBCAPT_COMPRESSION_DECODER_DECODER_STREAMBUF_HPP_
-
+#pragma once
 #include <ostream>
 #include <cstddef>
 #include <vector>
@@ -30,5 +28,3 @@ namespace Capt::Compression {
         explicit DecoderStreambuf(std::streambuf& stream, unsigned lineSize, std::ostream* commandLog = nullptr) noexcept;
     };
 }
-
-#endif

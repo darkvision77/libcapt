@@ -1,6 +1,4 @@
-#ifndef _LIBCAPT_BASIC_CAPT_PRINTER_HPP_
-#define _LIBCAPT_BASIC_CAPT_PRINTER_HPP_
-
+#pragma once
 #include "Protocol/ExtendedStatus.hpp"
 #include "Protocol/PageParams.hpp"
 #include "Protocol/PrinterInfo.hpp"
@@ -180,5 +178,3 @@ namespace Capt {
 }
 
 #undef CHECK_RETCODE
-
-#endif
