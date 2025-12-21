@@ -21,7 +21,7 @@ jobs:
           sudo apt-get install libpopt0:i386
 
       - name: Configure
-        run: cmake -G Ninja -S. -B build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_TESTS=ON -DLIBCAPT_COMPRESSION_TESTS=ON
+        run: cmake -G Ninja -S. -B build -DLIBCAPT_SANITIZE=ON -DLIBCAPT_BUILD_TESTS=ON -DLIBCAPT_COMPRESSION_TESTS=ON -DCMAKE_CXX_FLAGS="-Werror"
 
       - name: Compile
         run: cmake --build build -v -j
