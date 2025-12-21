@@ -3,7 +3,7 @@ include(CheckCXXSourceCompiles)
 check_cxx_source_compiles("
 #include <bit>
 int main() {
-    std::byteswap(123);
+    [[maybe_unused]] int a = std::byteswap(123);
     return 0;
 }
 " HAVE_BYTESWAP)
