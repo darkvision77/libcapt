@@ -3,7 +3,7 @@ message(STATUS "Using CMake v${CMAKE_VERSION}")
 
 project(
     libcapt
-    VERSION 0.15.12
+    VERSION 0.15.16
     LANGUAGES CXX
 )
 
