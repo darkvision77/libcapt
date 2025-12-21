@@ -57,7 +57,7 @@ namespace Capt::Utility {
             return n;
         }
         std::streamsize result = 0;
-        while (n > this->cropLineSize) {
+        while (static_cast<unsigned>(n) > this->cropLineSize) {
             std::streamsize read = this->xsgetn(s, this->cropLineSize);
             result += read;
             if (read == 0) {
