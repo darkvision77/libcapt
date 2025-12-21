@@ -11,8 +11,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 option(LIBCAPT_BUILD_EXAMPLES "Build examples" OFF)
 option(LIBCAPT_BUILD_TESTS "Build tests" OFF)
 option(LIBCAPT_COMPRESSION_TESTS "Build compressor and decoder tests" OFF)
@@ -20,6 +18,7 @@ option(LIBCAPT_COVERAGE "Enable code coverage" OFF)
 option(LIBCAPT_SANITIZE "Enable address and undefined sanitizers" OFF)
 option(LIBCAPT_INSTALL "Install targets" ${PROJECT_IS_TOP_LEVEL})
 
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -30,44 +29,7 @@ else()
 endif()
 
 if(LIBCAPT_COVERAGE)
-    add_compile_options(--coverage -g)
-    add_link_options(--coverage)
-
-    find_program(LCOV NAMES lcov REQUIRED)
-    find_program(GENHTML NAMES genhtml REQUIRED)
-
-    set(LCOV_DIR "${CMAKE_BINARY_DIR}/coverage")
-    set(LCOV_FILE "${LCOV_DIR}/coverage.info")
-    file(MAKE_DIRECTORY "${LCOV_DIR}")
-    add_custom_target(
-        coverage
-        COMMAND
-        "${LCOV}"
-        --capture --all
-        --config-file "${CMAKE_SOURCE_DIR}/.lcovrc"
-        --directory "${CMAKE_BINARY_DIR}"
-        --base-directory "${CMAKE_SOURCE_DIR}"
-        --output-file "${LCOV_FILE}"
-        --demangle-cpp
-        --parallel ${CMAKE_BUILD_PARALLEL_LEVEL}
-        --quiet
-        COMMAND
-        "${GENHTML}"
-        -o "${LCOV_DIR}"
-        "${LCOV_FILE}"
-        --parallel ${CMAKE_BUILD_PARALLEL_LEVEL}
-        COMMAND echo "Coverage report can be found at file://${LCOV_DIR}/index.html"
-        VERBATIM
-    )
-
-    add_custom_target(
-        coverage-reset
-        COMMAND
-        "${LCOV}"
-        --directory "${CMAKE_BINARY_DIR}"
-        --zerocounters
-        VERBATIM
-    )
+    include(Coverage)
 endif()
 
 if(LIBCAPT_SANITIZE)
