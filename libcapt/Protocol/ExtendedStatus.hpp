@@ -23,7 +23,8 @@ namespace Capt::Protocol {
         }
 
         constexpr bool IsPrinting() const noexcept {
-            return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0;
+            return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0
+                || !this->Printed;
         }
 
         constexpr bool Ready() const noexcept {
