@@ -164,6 +164,12 @@ namespace Capt {
             return this->WaitStatus({}, func, delay).value();
         }
 
+        inline virtual std::optional<Protocol::ExtendedStatus> WaitPrintEnd(StopTokenType stopToken, unsigned expectedPage) {
+            return this->WaitStatus(stopToken, [expectedPage](const Protocol::ExtendedStatus& ex) {
+                return !ex.IsPrinting(expectedPage);
+            }, std::chrono::seconds(1));
+        }
+
         // nullopt if stop requested
         inline virtual std::optional<Protocol::ExtendedStatus> WaitPrintEnd(StopTokenType stopToken) {
             return this->WaitStatus(stopToken, [](const Protocol::ExtendedStatus& ex) {
