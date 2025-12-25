@@ -22,13 +22,9 @@ namespace Capt::Protocol {
             return (this->PaperAvailableBits & (0x80 >> (slot & 0x1f))) != 0;
         }
 
-        constexpr bool IsPrinting(unsigned expectedPage) const noexcept {
-            return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0
-                || (this->Online() && expectedPage ? this->Printed != expectedPage : this->Printed == 0);
-        }
-
         constexpr bool IsPrinting() const noexcept {
-            return this->IsPrinting(0);
+            return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0
+                || (this->Printed == 0 && this->Online());
         }
 
         constexpr bool Ready() const noexcept {
