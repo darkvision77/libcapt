@@ -44,7 +44,7 @@ namespace Capt::Compression {
             this->Next();
         }
 
-        constexpr ScoaFunc Peek() const noexcept {
+        [[nodiscard]] constexpr ScoaFunc Peek() const noexcept {
             assert(this->index != 0);
             return this->curr;
         }
@@ -55,7 +55,7 @@ namespace Capt::Compression {
             return f;
         }
 
-        constexpr bool Empty() const noexcept {
+        [[nodiscard]] constexpr bool Empty() const noexcept {
             return this->index > (line.size() + 1);
         }
 

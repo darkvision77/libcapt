@@ -15,14 +15,14 @@ namespace Capt {
 
         std::array<uint8_t, Size> Payload;
 
-        constexpr auto AppendByte(uint8_t value) noexcept {
+        [[nodiscard]] constexpr auto AppendByte(uint8_t value) noexcept {
             PacketBuilder<Size + 1> res;
             std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
             res.Payload[Size] = value;
             return res;
         }
 
-        constexpr auto AppendUint16(uint16_t value) noexcept {
+        [[nodiscard]] constexpr auto AppendUint16(uint16_t value) noexcept {
             PacketBuilder<Size + 2> res;
             std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
             res.Payload[Size] = value & 0xff;
@@ -30,7 +30,7 @@ namespace Capt {
             return res;
         }
 
-        constexpr auto AppendUint32(uint32_t value) noexcept {
+        [[nodiscard]] constexpr auto AppendUint32(uint32_t value) noexcept {
             PacketBuilder<Size + 4> res;
             std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
             res.Payload[Size] = value & 0xff;
@@ -41,7 +41,7 @@ namespace Capt {
         }
 
         template<std::size_t DataSize>
-        constexpr auto AppendBytes(std::span<const uint8_t, DataSize> data) noexcept {
+        [[nodiscard]] constexpr auto AppendBytes(std::span<const uint8_t, DataSize> data) noexcept {
             PacketBuilder<Size + data.size()> res;
             std::move(this->Payload.begin(), this->Payload.end(), res.Payload.begin());
             std::copy_n(data.begin(), data.size(), res.Payload.begin() + Size);
@@ -49,7 +49,7 @@ namespace Capt {
         }
 
         template<std::size_t DataSize>
-        constexpr auto AppendBytes(const std::array<uint8_t, DataSize>& data) noexcept {
+        [[nodiscard]] constexpr auto AppendBytes(const std::array<uint8_t, DataSize>& data) noexcept {
             return this->AppendBytes(std::span<const uint8_t, DataSize>(data));
         }
 

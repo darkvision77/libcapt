@@ -13,7 +13,7 @@ namespace Capt {
         constexpr explicit PacketHeader(uint16_t opcode, uint16_t payloadSize) noexcept
             : Opcode(opcode), PayloadSize(payloadSize) {}
 
-        constexpr std::size_t Size() const noexcept {
+        [[nodiscard]] constexpr std::size_t Size() const noexcept {
             return this->PayloadSize + 4;
         }
 
