@@ -1,7 +1,7 @@
 #include "ExtendedStatus.hpp"
 #include <iomanip>
 
-namespace Capt::Protocol {
+namespace Capt {
     std::ostream& operator<<(std::ostream& os, const ExtendedStatus& status) {
         auto fill = os.fill();
         auto flags = os.flags();

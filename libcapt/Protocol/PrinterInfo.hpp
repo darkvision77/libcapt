@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace Capt::Protocol {
+namespace Capt {
     struct PrinterInfo {
         uint8_t DeviceId;
         uint8_t Type;

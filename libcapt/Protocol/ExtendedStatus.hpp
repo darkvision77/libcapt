@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <ostream>
 
-namespace Capt::Protocol {
+namespace Capt {
     struct ExtendedStatus {
         BasicStatus Basic;
         uint8_t Changed;
@@ -54,8 +54,8 @@ namespace Capt::Protocol {
         }
 
         constexpr bool Misprint() const noexcept {
-            return (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT) != 0
-                || (this->Engine & Protocol::EngineReadyStatus::MIS_PRINT_2) != 0;
+            return (this->Engine & EngineReadyStatus::MIS_PRINT) != 0
+                || (this->Engine & EngineReadyStatus::MIS_PRINT_2) != 0;
         }
 
         constexpr bool ClearErrorNeeded() const noexcept {

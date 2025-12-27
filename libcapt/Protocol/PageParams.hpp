@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace Capt::Protocol {
+namespace Capt {
     struct PageParams {
         uint8_t PaperSize;
         uint8_t TonerDensity;

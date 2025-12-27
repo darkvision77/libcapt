@@ -48,7 +48,7 @@ namespace Capt::Utility {
         return this->gptr() - this->eback();
     }
 
-    BufferedPage::BufferedPage(unsigned page, const Protocol::PageParams& params, std::streambuf* stream, std::size_t blockSize) noexcept
+    BufferedPage::BufferedPage(unsigned page, const PageParams& params, std::streambuf* stream, std::size_t blockSize) noexcept
         : videoStream(stream), blockSize(blockSize), PageNumber(page), Params(params) {}
 
     BufferedPage::BufferedPage(BufferedPage&& other) noexcept : buffer(std::move(other.buffer)), videoStream(nullptr), PageNumber(other.PageNumber), Params(std::move(other.Params)) {

@@ -40,18 +40,18 @@ namespace Capt {
     class BasicCaptPrinter {
     protected:
         std::iostream& stream;
-        std::optional<Protocol::PrinterInfo> cachedInfo;
+        std::optional<PrinterInfo> cachedInfo;
     public:
         typedef StopTokenT StopTokenType;
 
         explicit BasicCaptPrinter(std::iostream& stream) noexcept : stream(stream) {}
         virtual ~BasicCaptPrinter() noexcept = default;
 
-        virtual Protocol::ExtendedStatus GetStatus() {
+        virtual ExtendedStatus GetStatus() {
             return Protocol::PC_GET_EXTENDED_STATUS(this->stream);
         }
 
-        virtual Protocol::PrinterInfo GetPrinterInfo() {
+        virtual PrinterInfo GetPrinterInfo() {
             if (!this->cachedInfo) {
                 this->cachedInfo = Protocol::PC_GET_PRINTER_INFO(this->stream);
             }
@@ -60,28 +60,28 @@ namespace Capt {
 
         virtual void ReserveUnit() {
             CHECK_RETCODE(Protocol::PC_RESERVE_UNIT(this->stream));
-            Protocol::ExtendedStatus ex = this->GetStatus();
+            ExtendedStatus ex = this->GetStatus();
             if (!ex.UnitReserved()) {
                 throw UnexpectedBehaviourError("failed to reserve unit");
             }
         }
 
-        virtual void ClearError(const Protocol::ExtendedStatus* status = nullptr) {
-            Protocol::ExtendedStatus ex = status == nullptr ? this->GetStatus() : *status;
+        virtual void ClearError(const ExtendedStatus* status = nullptr) {
+            ExtendedStatus ex = status == nullptr ? this->GetStatus() : *status;
             assert(ex.UnitReserved());
             CHECK_RETCODE(Protocol::PCR_CLEAR_ERROR(this->stream));
             CHECK_RETCODE(Protocol::PCR_DISCARD_DATA(this->stream));
             if (ex.Misprint()) {
                 CHECK_RETCODE(Protocol::PCR_CLEAR_MISPRINT(this->stream));
             }
-            if ((ex.Controller & Protocol::ControllerStatus::ENGINE_COMM_ERROR) != 0) {
+            if ((ex.Controller & ControllerStatus::ENGINE_COMM_ERROR) != 0) {
                 CHECK_RETCODE(Protocol::PCR_RESET_ENGINE(this->stream));
             }
         }
 
         virtual bool GoOnline(unsigned page) {
             CHECK_RETCODE(Protocol::PCR_GO_ONLINE(this->stream, page));
-            Protocol::ExtendedStatus ex = this->GetStatus();
+            ExtendedStatus ex = this->GetStatus();
             return ex.Online();
         }
 
@@ -90,7 +90,7 @@ namespace Capt {
         }
 
         // If blockSize is zero, it will be taken from PrinterInfo
-        virtual bool WriteVideoData(StopTokenType stopToken, const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
+        virtual bool WriteVideoData(StopTokenType stopToken, const PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
             if (blockSize == 0) {
                 blockSize = this->GetPrinterInfo().BlockSize;
             }
@@ -105,11 +105,11 @@ namespace Capt {
                     break;
                 }
                 while (!stopToken.stop_requested()) {
-                    Protocol::BasicStatus bs = Protocol::PCR_GET_BASIC_STATUS(this->stream);
-                    if ((bs & Protocol::BasicStatus::NOT_READY) != 0) {
+                    BasicStatus bs = Protocol::PCR_GET_BASIC_STATUS(this->stream);
+                    if ((bs & BasicStatus::NOT_READY) != 0) {
                         return false;
                     }
-                    if ((bs & Protocol::BasicStatus::IM_DATA_BUSY) == 0) {
+                    if ((bs & BasicStatus::IM_DATA_BUSY) == 0) {
                         break;
                     }
                 }
@@ -121,21 +121,21 @@ namespace Capt {
             Protocol::IC_END_PAGE(this->stream);
             return true;
         }
-        inline virtual bool WriteVideoData(const Protocol::PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
+        inline virtual bool WriteVideoData(const PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
             return this->WriteVideoData({}, params, videoStream, blockSize);
         }
 
         virtual void GoOffline() {
             CHECK_RETCODE(Protocol::PCR_GO_OFFLINE(this->stream));
             // TODO: delay needed in some cases
-            Protocol::ExtendedStatus ex = this->GetStatus();
+            ExtendedStatus ex = this->GetStatus();
             if (ex.Online()) {
                 throw UnexpectedBehaviourError("failed to offline");
             }
         }
 
         virtual void ReleaseUnit() {
-            Protocol::ExtendedStatus ex = this->GetStatus();
+            ExtendedStatus ex = this->GetStatus();
             if (!ex.UnitReserved()) {
                 return;
             }
@@ -148,9 +148,9 @@ namespace Capt {
 
         // nullopt if stop requested
         template<typename TFunc, typename Rep, typename Period>
-        std::optional<Protocol::ExtendedStatus> WaitStatus(StopTokenType stopToken, TFunc func, const std::chrono::duration<Rep, Period>& delay) {
+        std::optional<ExtendedStatus> WaitStatus(StopTokenType stopToken, TFunc func, const std::chrono::duration<Rep, Period>& delay) {
             while (!stopToken.stop_requested()) {
-                Protocol::ExtendedStatus ex = this->GetStatus();
+                ExtendedStatus ex = this->GetStatus();
                 if (func(ex)) {
                     return ex;
                 }
@@ -160,18 +160,18 @@ namespace Capt {
         }
 
         template<typename TFunc, typename Rep, typename Period>
-        Protocol::ExtendedStatus WaitStatus(TFunc func, const std::chrono::duration<Rep, Period>& delay) {
+        ExtendedStatus WaitStatus(TFunc func, const std::chrono::duration<Rep, Period>& delay) {
             return this->WaitStatus({}, func, delay).value();
         }
 
         // nullopt if stop requested
-        inline virtual std::optional<Protocol::ExtendedStatus> WaitPrintEnd(StopTokenType stopToken) {
-            return this->WaitStatus(stopToken, [](const Protocol::ExtendedStatus& ex) {
+        inline virtual std::optional<ExtendedStatus> WaitPrintEnd(StopTokenType stopToken) {
+            return this->WaitStatus(stopToken, [](const ExtendedStatus& ex) {
                 return !ex.IsPrinting();
             }, std::chrono::seconds(1));
         }
 
-        inline virtual Protocol::ExtendedStatus WaitPrintEnd() {
+        inline virtual ExtendedStatus WaitPrintEnd() {
             return this->WaitPrintEnd({}).value();
         }
     };

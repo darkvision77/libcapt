@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Capt::Protocol {
+namespace Capt {
     enum class ReprintStatus {
         None = 0,
         Prev,

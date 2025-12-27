@@ -92,7 +92,7 @@ private:
 public:
     explicit PbmPageProvider(std::istream& pbmStream) : pbmStream(pbmStream) {}
 
-    std::optional<Protocol::PageParams> ReadHeader() {
+    std::optional<PageParams> ReadHeader() {
         unsigned width;
         unsigned lines;
         if (!readPbmHeader(this->pbmStream, width, lines)) {
@@ -101,11 +101,11 @@ public:
         if (width % 8 != 0) {
             throw std::runtime_error("PBM width must be a multiple of 8");
         }
-        return Protocol::PageParams{
+        return PageParams{
             .PaperSize = 0x09,
             .TonerDensity = 0x3f,
             .Mode = 0,
-            .Resolution = Protocol::ResolutionIdx::RES_600,
+            .Resolution = ResolutionIdx::RES_600,
             .SmoothEnable = true,
             .TonerSaving = false,
             .MarginLeft = 1,
@@ -119,28 +119,28 @@ public:
 };
 
 template<StopToken Token>
-static Protocol::ExtendedStatus waitReady(Token stopToken, BasicCaptPrinter<Token>& printer) {
-    Protocol::ExtendedStatus status = printer.GetStatus();
+static ExtendedStatus waitReady(Token stopToken, BasicCaptPrinter<Token>& printer) {
+    ExtendedStatus status = printer.GetStatus();
     if (status.Ready()) {
         return status;
     }
     while (!status.Ready() && !stopToken.stop_requested()) {
         std::printf("\033[2K\r");
-        if ((status.Engine & Protocol::EngineReadyStatus::DOOR_OPEN) != 0) {
+        if ((status.Engine & EngineReadyStatus::DOOR_OPEN) != 0) {
             std::printf("Not ready: DOOR_OPEN");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::NO_CARTRIDGE) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::NO_CARTRIDGE) != 0) {
             std::printf("Not ready: NO_CARTRIDGE");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::WAITING) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::WAITING) != 0) {
             std::printf("Not ready: WAITING");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::TEST_PRINTING) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::TEST_PRINTING) != 0) {
             std::printf("Not ready: TEST_PRINTING");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::NO_PRINT_PAPER) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::NO_PRINT_PAPER) != 0) {
             std::printf("Not ready: NO_PRINT_PAPER");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::JAM) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::JAM) != 0) {
             std::printf("Not ready: JAM");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::CLEANING) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::CLEANING) != 0) {
             std::printf("Not ready: CLEANING");
-        } else if ((status.Engine & Protocol::EngineReadyStatus::SERVICE_CALL) != 0) {
+        } else if ((status.Engine & EngineReadyStatus::SERVICE_CALL) != 0) {
             throw std::runtime_error("Unrecoverable error: SERVICE_CALL");
         } else if (status.ClearErrorNeeded()) {
             std::printf("Sending clear error...");
@@ -159,7 +159,7 @@ static Protocol::ExtendedStatus waitReady(Token stopToken, BasicCaptPrinter<Toke
 template<StopToken Token>
 static void prepareBeforePrint(Token stopToken, BasicCaptPrinter<Token>& printer, unsigned page) {
     while (true) {
-        Protocol::ExtendedStatus status = waitReady(stopToken, printer);
+        ExtendedStatus status = waitReady(stopToken, printer);
         if (stopToken.stop_requested()) {
             return;
         }
@@ -177,22 +177,22 @@ static void prepareBeforePrint(Token stopToken, BasicCaptPrinter<Token>& printer
 
 template<StopToken Token>
 static bool writePage(Token stopToken, BasicCaptPrinter<Token>& printer, Utility::BufferedPage& page, Utility::BufferedPage* prev) {
-    Protocol::ReprintStatus reprint = Protocol::ReprintStatus::None;
+    ReprintStatus reprint = ReprintStatus::None;
     while (!stopToken.stop_requested()) {
-        Utility::BufferedPage& p = (prev && reprint == Protocol::ReprintStatus::Prev) ? *prev : page;
+        Utility::BufferedPage& p = (prev && reprint == ReprintStatus::Prev) ? *prev : page;
         p.pubseekpos(0);
         prepareBeforePrint(stopToken, printer, p.PageNumber);
         if (stopToken.stop_requested()) {
             return true;
         }
-        if (reprint != Protocol::ReprintStatus::None) {
+        if (reprint != ReprintStatus::None) {
             std::printf("Retrying page %u...\n", p.PageNumber);
         } else {
             std::printf("Writing page %u...\n", p.PageNumber);
         }
         if (printer.WriteVideoData(p.Params, p)) {
-            if (prev && reprint == Protocol::ReprintStatus::Prev) {
-                reprint = Protocol::ReprintStatus::None;
+            if (prev && reprint == ReprintStatus::Prev) {
+                reprint = ReprintStatus::None;
                 continue;
             }
             break;
@@ -221,7 +221,7 @@ static bool waitLastPage(Token stopToken, BasicCaptPrinter<Token>& printer, Util
         }
         if (status->VideoDataError()) {
             return false;
-        } else if (status->GetReprintStatus() == Protocol::ReprintStatus::None) {
+        } else if (status->GetReprintStatus() == ReprintStatus::None) {
             break;
         }
         if (!writePage(stopToken, printer, page, nullptr)) {

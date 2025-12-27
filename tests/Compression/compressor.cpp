@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
         lineSize /= 8;
         scoaStreambuf.Reset(*pbmStream.rdbuf(), lineSize, lines);
 
-        Protocol::PageParams pp;
+        PageParams pp;
         pp.ImageLineSize = static_cast<uint16_t>(lineSize);
         pp.ImageLines = static_cast<uint16_t>(lines);
         std::fprintf(stderr, "Page: %u\n", page + 1);

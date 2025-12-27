@@ -35,11 +35,11 @@ protected:
 };
 
 TEST_F(ProtocolTest, IC_BEGIN_PAGE) {
-    Protocol::IC_BEGIN_PAGE(stream, Protocol::PageParams{
+    Protocol::IC_BEGIN_PAGE(stream, PageParams{
         .PaperSize = 7,
         .TonerDensity = 0x1f,
         .Mode = 123,
-        .Resolution = Protocol::ResolutionIdx::RES_600,
+        .Resolution = ResolutionIdx::RES_600,
         .SmoothEnable = true,
         .TonerSaving = true,
         .MarginLeft = 0x01fe,
@@ -79,11 +79,11 @@ TEST_F(ProtocolTest, IC_BEGIN_PAGE) {
         0x90, 0xfc, // PaperHeight
     });
 
-    Protocol::IC_BEGIN_PAGE(stream, Protocol::PageParams{
+    Protocol::IC_BEGIN_PAGE(stream, PageParams{
         .PaperSize = 7,
         .TonerDensity = 0x1f,
         .Mode = 123,
-        .Resolution = Protocol::ResolutionIdx::RES_300,
+        .Resolution = ResolutionIdx::RES_300,
         .SmoothEnable = false,
         .TonerSaving = false,
         .MarginLeft = 0x01fe,
@@ -162,7 +162,7 @@ TEST_F(ProtocolTest, PC_GET_EXTENDED_STATUS) {
         0x45, 0x67, // Printed
         0, 0,
     });
-    Protocol::ExtendedStatus status = Protocol::PC_GET_EXTENDED_STATUS(stream);
+    ExtendedStatus status = Protocol::PC_GET_EXTENDED_STATUS(stream);
     ExpectPacket(0xA0A0);
     EXPECT_EQ(status.Basic, 0x1f);
     EXPECT_EQ(status.Aux, 0x2e);
@@ -192,7 +192,7 @@ TEST_F(ProtocolTest, PC_GET_EXTENDED_STATUS_ErrorBit) {
             0, 0,
         });
         Protocol::PC_GET_EXTENDED_STATUS(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PC_GET_EXTENDED_STATUS_UnexpectedOpcodeResponse) {
@@ -210,7 +210,7 @@ TEST_F(ProtocolTest, PC_GET_EXTENDED_STATUS_UnexpectedOpcodeResponse) {
             0, 0, 0, 0,
         });
         Protocol::PC_GET_EXTENDED_STATUS(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PC_GET_PRINTER_INFO) {
@@ -229,7 +229,7 @@ TEST_F(ProtocolTest, PC_GET_PRINTER_INFO) {
         0x02,
         0x00,
     });
-    Protocol::PrinterInfo info = Protocol::PC_GET_PRINTER_INFO(stream);
+    PrinterInfo info = Protocol::PC_GET_PRINTER_INFO(stream);
     ExpectPacket(0xA1A1);
     EXPECT_EQ(info.DeviceId, 0xe3);
     EXPECT_EQ(info.Type, 0);
@@ -257,7 +257,7 @@ TEST_F(ProtocolTest, PC_GET_PRINTER_INFO_UnexpectedOpcodeResponse) {
             0x00,
         });
         Protocol::PC_GET_PRINTER_INFO(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_GET_BASIC_STATUS) {
@@ -272,7 +272,7 @@ TEST_F(ProtocolTest, PCR_GET_BASIC_STATUS_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0x11, 0x22});
         Protocol::PCR_GET_BASIC_STATUS(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_GO_ONLINE) {
@@ -290,7 +290,7 @@ TEST_F(ProtocolTest, PCR_GO_ONLINE_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_GO_ONLINE(stream, 0x1234);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_CLEANING) {
@@ -308,7 +308,7 @@ TEST_F(ProtocolTest, PCR_CLEANING_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_CLEANING(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PC_RESERVE_UNIT) {
@@ -321,7 +321,7 @@ TEST_F(ProtocolTest, PC_RESERVE_UNIT_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PC_RESERVE_UNIT(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_DISCARD_DATA) {
@@ -334,7 +334,7 @@ TEST_F(ProtocolTest, PCR_DISCARD_DATA_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_DISCARD_DATA(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_CLEAR_ERROR) {
@@ -347,7 +347,7 @@ TEST_F(ProtocolTest, PCR_CLEAR_ERROR_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_CLEAR_ERROR(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_GO_OFFLINE) {
@@ -360,7 +360,7 @@ TEST_F(ProtocolTest, PCR_GO_OFFLINE_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_GO_OFFLINE(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_RELEASE_UNIT) {
@@ -373,7 +373,7 @@ TEST_F(ProtocolTest, PCR_RELEASE_UNIT_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_RELEASE_UNIT(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_CLEAR_MISPRINT) {
@@ -386,7 +386,7 @@ TEST_F(ProtocolTest, PCR_CLEAR_MISPRINT_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_CLEAR_MISPRINT(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }
 
 TEST_F(ProtocolTest, PCR_RESET_ENGINE) {
@@ -399,5 +399,5 @@ TEST_F(ProtocolTest, PCR_RESET_ENGINE_UnexpectedOpcodeResponse) {
     EXPECT_THROW({
         WritePacket(0x1234, {0, 0});
         Protocol::PCR_RESET_ENGINE(stream);
-    }, Protocol::ProtocolError);
+    }, ProtocolError);
 }

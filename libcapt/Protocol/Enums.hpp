@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace Capt::Protocol {
+namespace Capt {
     enum ResolutionIdx : uint8_t {
         RES_300 = 0,
         RES_600 = 0x11,

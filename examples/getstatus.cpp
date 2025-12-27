@@ -7,14 +7,14 @@
 
 using namespace Capt;
 
-static void printBasicStatus(Protocol::BasicStatus status) {
+static void printBasicStatus(BasicStatus status) {
     std::printf("BasicStatus = 0x%02X\n", static_cast<int>(status));
     int check = 0;
     if ((static_cast<int>(status) & 1) != 0) { // 1
         std::puts("  UNKNOWN 1");
         check |= 1;
     }
-    if ((status & Protocol::BasicStatus::NOT_READY) != 0) { // 2
+    if ((status & BasicStatus::NOT_READY) != 0) { // 2
         std::puts("  NOT_READY");
         check |= 2;
     }
@@ -26,7 +26,7 @@ static void printBasicStatus(Protocol::BasicStatus status) {
         std::puts("  *RCF_IM_DATA_BUSY");
         check |= 8;
     }
-    if ((status & Protocol::BasicStatus::OFFLINE) != 0) { // 16
+    if ((status & BasicStatus::OFFLINE) != 0) { // 16
         std::puts("  OFFLINE");
         check |= 16;
     }
@@ -34,11 +34,11 @@ static void printBasicStatus(Protocol::BasicStatus status) {
         std::puts("  UNKNOWN 32");
         check |= 32;
     }
-    if ((status & Protocol::BasicStatus::UNIT_FREE) != 0) { // 64
+    if ((status & BasicStatus::UNIT_FREE) != 0) { // 64
         std::puts("  UNIT_FREE");
         check |= 64;
     }
-    if ((status & Protocol::BasicStatus::ERROR_BIT) != 0) { // 128
+    if ((status & BasicStatus::ERROR_BIT) != 0) { // 128
         std::puts("  ERROR_BIT");
         check |= 128;
     }
@@ -47,18 +47,18 @@ static void printBasicStatus(Protocol::BasicStatus status) {
     }
 }
 
-static void printAuxStatus(Protocol::AuxStatus status) {
+static void printAuxStatus(AuxStatus status) {
     std::printf("AuxStatus = 0x%02X\n", static_cast<int>(status));
     int check = 0;
     if ((static_cast<int>(status) & 1) != 0) { // 1
         std::puts("  UNKNOWN 1");
         check |= 1;
     }
-    if ((status & Protocol::AuxStatus::PRINTER_BUSY) != 0) { // 2
+    if ((status & AuxStatus::PRINTER_BUSY) != 0) { // 2
         std::puts("  PRINTER_BUSY");
         check |= 2;
     }
-    if ((status & Protocol::AuxStatus::PAPER_DELIVERY) != 0) { // 4
+    if ((status & AuxStatus::PAPER_DELIVERY) != 0) { // 4
         std::puts("  PAPER_DELIVERY");
         check |= 4;
     }
@@ -78,7 +78,7 @@ static void printAuxStatus(Protocol::AuxStatus status) {
         std::puts("  UNKNOWN 64");
         check |= 64;
     }
-    if ((status & Protocol::AuxStatus::SAFE_TIMER) != 0) { // 128
+    if ((status & AuxStatus::SAFE_TIMER) != 0) { // 128
         std::puts("  SAFE_TIMER");
         check |= 128;
     }
@@ -87,34 +87,34 @@ static void printAuxStatus(Protocol::AuxStatus status) {
     }
 }
 
-static void printControllerStatus(Protocol::ControllerStatus status) {
+static void printControllerStatus(ControllerStatus status) {
     std::printf("ControllerStatus = 0x%02X\n", static_cast<int>(status));
     int check = 0;
-    if ((status & Protocol::ControllerStatus::OVERRUN) != 0) { // 1
+    if ((status & ControllerStatus::OVERRUN) != 0) { // 1
         std::puts("  OVERRUN");
         check |= 1;
     }
-    if ((status & Protocol::ControllerStatus::UNDERRUN) != 0) { // 2
+    if ((status & ControllerStatus::UNDERRUN) != 0) { // 2
         std::puts("  UNDERRUN");
         check |= 2;
     }
-    if ((status & Protocol::ControllerStatus::MISSING_EOP) != 0) { // 4
+    if ((status & ControllerStatus::MISSING_EOP) != 0) { // 4
         std::puts("  MISSING_EOP");
         check |= 4;
     }
-    if ((status & Protocol::ControllerStatus::INVALID_DATA) != 0) { // 8
+    if ((status & ControllerStatus::INVALID_DATA) != 0) { // 8
         std::puts("  INVALID_DATA");
         check |= 8;
     }
-    if ((status & Protocol::ControllerStatus::ENGINE_COMM_ERROR) != 0) { // 16
+    if ((status & ControllerStatus::ENGINE_COMM_ERROR) != 0) { // 16
         std::puts("  ENGINE_COMM_ERROR");
         check |= 16;
     }
-    if ((status & Protocol::ControllerStatus::ENGINE_RESET_IN_PROGRESS) != 0) { // 32
+    if ((status & ControllerStatus::ENGINE_RESET_IN_PROGRESS) != 0) { // 32
         std::puts("  ENGINE_RESET_IN_PROGRESS");
         check |= 32;
     }
-    if ((status & Protocol::ControllerStatus::PRINT_REJECTED) != 0) { // 64
+    if ((status & ControllerStatus::PRINT_REJECTED) != 0) { // 64
         std::puts("  PRINT_REJECTED");
         check |= 64;
     }
@@ -123,46 +123,46 @@ static void printControllerStatus(Protocol::ControllerStatus status) {
     }
 }
 
-static void printEngineStatus(Protocol::EngineReadyStatus status) {
+static void printEngineStatus(EngineReadyStatus status) {
     std::printf("EngineReadyStatus = 0x%02X\n", static_cast<int>(status));
     int check = 0;
-    if ((status & Protocol::EngineReadyStatus::DOOR_OPEN) != 0) { // 0x4000
+    if ((status & EngineReadyStatus::DOOR_OPEN) != 0) { // 0x4000
         std::puts("  DOOR_OPEN");
         check |= 0x4000;
     }
-    if ((status & Protocol::EngineReadyStatus::NO_CARTRIDGE) != 0) { // 0x2000
+    if ((status & EngineReadyStatus::NO_CARTRIDGE) != 0) { // 0x2000
         std::puts("  NO_CARTRIDGE");
         check |= 0x2000;
     }
-    if ((status & Protocol::EngineReadyStatus::WAITING) != 0) { // 0x1000
+    if ((status & EngineReadyStatus::WAITING) != 0) { // 0x1000
         std::puts("  WAITING");
         check |= 0x1000;
     }
-    if ((status & Protocol::EngineReadyStatus::TEST_PRINTING) != 0) { // 0x400
+    if ((status & EngineReadyStatus::TEST_PRINTING) != 0) { // 0x400
         std::puts("  TEST_PRINTING");
         check |= 0x400;
     }
-    if ((status & Protocol::EngineReadyStatus::NO_PRINT_PAPER) != 0) { // 0x200
+    if ((status & EngineReadyStatus::NO_PRINT_PAPER) != 0) { // 0x200
         std::puts("  NO_PRINT_PAPER");
         check |= 0x200;
     }
-    if ((status & Protocol::EngineReadyStatus::JAM) != 0) { // 0x100
+    if ((status & EngineReadyStatus::JAM) != 0) { // 0x100
         std::puts("  JAM");
         check |= 0x100;
     }
-    if ((status & Protocol::EngineReadyStatus::CLEANING) != 0) { // 4
+    if ((status & EngineReadyStatus::CLEANING) != 0) { // 4
         std::puts("  CLEANING");
         check |= 4;
     }
-    if ((status & Protocol::EngineReadyStatus::SERVICE_CALL) != 0) { // 2
+    if ((status & EngineReadyStatus::SERVICE_CALL) != 0) { // 2
         std::puts("  SERVICE_CALL");
         check |= 2;
     }
-    if ((status & Protocol::EngineReadyStatus::MIS_PRINT) != 0) { // 0x80
+    if ((status & EngineReadyStatus::MIS_PRINT) != 0) { // 0x80
         std::puts("  MIS_PRINT");
         check |= 0x80;
     }
-    if ((status & Protocol::EngineReadyStatus::MIS_PRINT_2) != 0) { // 0x40
+    if ((status & EngineReadyStatus::MIS_PRINT_2) != 0) { // 0x40
         std::puts("  MIS_PRINT_2");
         check |= 0x40;
     }
@@ -171,7 +171,7 @@ static void printEngineStatus(Protocol::EngineReadyStatus status) {
     }
 }
 
-static void printStatus(Protocol::ExtendedStatus ex) {
+static void printStatus(ExtendedStatus ex) {
     printBasicStatus(ex.Basic);
     printAuxStatus(ex.Aux);
     printControllerStatus(ex.Controller);

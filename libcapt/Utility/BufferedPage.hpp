@@ -17,10 +17,10 @@ namespace Capt::Utility {
         pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override;
     public:
         unsigned PageNumber = 0;
-        Protocol::PageParams Params;
+        PageParams Params;
 
         BufferedPage() = default;
-        explicit BufferedPage(unsigned page, const Protocol::PageParams& params, std::streambuf* stream, std::size_t blockSize = 4096) noexcept;
+        explicit BufferedPage(unsigned page, const PageParams& params, std::streambuf* stream, std::size_t blockSize = 4096) noexcept;
 
         BufferedPage(const BufferedPage&) = delete;
         BufferedPage& operator=(const BufferedPage&) = delete;
