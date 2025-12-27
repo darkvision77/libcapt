@@ -24,7 +24,8 @@ namespace Capt {
 
         constexpr bool IsPrinting() const noexcept {
             return (this->Aux & AuxStatus::PAPER_DELIVERY) != 0 || (this->Aux & AuxStatus::SAFE_TIMER) != 0
-                || (this->Online() && this->Start != this->Printing);
+                || (this->Online() && this->Start != this->Printing)
+                || (this->Engine & EngineReadyStatus::CLEANING) != 0;
         }
 
         constexpr bool Ready() const noexcept {
