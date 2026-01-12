@@ -112,5 +112,8 @@ Instead, it is run under a special [gdb python script](scripts/filter/wrap.py) t
     you need to set the margins to zero. But since the printer does not support zero margins,
     `captfilter` does not support them either. Therefore, we have to use the magic of gdb scripts.
 
+## SAST Tools
+[PVS-Studio](https://pvs-studio.com/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) — static analyzer for C, C++, C#, and Java code.
+
 ## License
 libcapt is licensed under a 2-clause BSD license.
