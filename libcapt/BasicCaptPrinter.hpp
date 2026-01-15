@@ -42,7 +42,7 @@ namespace Capt {
         std::iostream& stream;
         std::optional<PrinterInfo> cachedInfo;
     public:
-        typedef StopTokenT StopTokenType;
+        using StopTokenType = StopTokenT;
 
         explicit BasicCaptPrinter(std::iostream& stream) noexcept : stream(stream) {}
         virtual ~BasicCaptPrinter() noexcept = default;
