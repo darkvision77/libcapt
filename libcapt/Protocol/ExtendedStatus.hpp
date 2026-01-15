@@ -70,18 +70,6 @@ namespace Capt {
             return (this->Basic & BasicStatus::OFFLINE) == 0;
         }
 
-        [[nodiscard]] constexpr bool WaitRequired() const noexcept {
-            return (this->Controller & ControllerStatus::ENGINE_RESET_IN_PROGRESS) != 0
-                || (this->Engine & EngineReadyStatus::DOOR_OPEN) != 0
-                || (this->Engine & EngineReadyStatus::NO_CARTRIDGE) != 0
-                || (this->Engine & EngineReadyStatus::WAITING) != 0
-                || (this->Engine & EngineReadyStatus::TEST_PRINTING) != 0
-                || (this->Engine & EngineReadyStatus::NO_PRINT_PAPER) != 0
-                || (this->Engine & EngineReadyStatus::JAM) != 0
-                || (this->Engine & EngineReadyStatus::CLEANING) != 0
-                || (this->Engine & EngineReadyStatus::SERVICE_CALL) != 0;
-        }
-
         [[nodiscard]] constexpr bool ServiceCall() const noexcept {
             return (this->Engine & EngineReadyStatus::SERVICE_CALL) != 0;
         }

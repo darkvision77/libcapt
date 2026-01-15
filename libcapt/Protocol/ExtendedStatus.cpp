@@ -5,12 +5,13 @@ namespace Capt {
     std::ostream& operator<<(std::ostream& os, const ExtendedStatus& status) {
         auto fill = os.fill();
         auto flags = os.flags();
-        os << std::showbase << std::hex << std::setfill('0') << std::internal;
-        os << "ExtendedStatus[Basic=" << std::setw(4) << static_cast<int>(status.Basic)
-            << " Aux=" << std::setw(4) << static_cast<int>(status.Aux)
-            << " Controller=" << std::setw(4) << static_cast<int>(status.Controller)
-            << " Engine=" << std::setw(4) << status.Engine
-            << std::noshowbase << std::dec
+        os << std::hex << std::setfill('0');
+        os << "ExtendedStatus[Basic=0x" << std::setw(2) << static_cast<unsigned>(status.Basic)
+            << " Aux=0x" << std::setw(2) << static_cast<unsigned>(status.Aux)
+            << " Controller=0x" << std::setw(2) << static_cast<unsigned>(status.Controller)
+            << " Engine=0x" << std::setw(4) << status.Engine
+            << " PaperAvailableBits=0x" << std::setw(2) << static_cast<unsigned>(status.PaperAvailableBits)
+            << std::dec
             << " Start=" << status.Start
             << " Printing=" << status.Printing
             << " Shipped=" << status.Shipped
