@@ -55,7 +55,6 @@ cmake --build build
 ctest --test-dir build
 ```
 Compression test files are located at [`tests/Compression/data`](tests/Compression/data).
-If you are adding your own files, don't forget to add them into the [`CMakeLists.txt`](tests/Compression/CMakeLists.txt) file.
 
 ## Usage
 There are several options if you want to print on your Canon LBP printer (except for the original driver):

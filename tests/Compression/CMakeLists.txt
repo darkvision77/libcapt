@@ -9,24 +9,13 @@ add_executable(decoder decoder.cpp)
 target_link_libraries(decoder libcapt)
 target_include_directories(decoder PRIVATE $<TARGET_PROPERTY:libcapt,INCLUDE_DIRECTORIES>)
 
-set(
-    PBM_FILES
-    "${CMAKE_CURRENT_LIST_DIR}/data/randA.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/randB.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/randC.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/randD.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/randE.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/randF.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/empty.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/black-1.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/repx-1.pbm"
-    "${CMAKE_CURRENT_LIST_DIR}/data/textA.pbm"
-)
+file(GLOB PBM_FILES "${CMAKE_CURRENT_LIST_DIR}/data/*.pbm")
+list(LENGTH PBM_FILES PBM_FILES_COUNT)
+message(STATUS "Total PBM files count: ${PBM_FILES_COUNT}")
 
-set(
-    PDF_RAW_FILES
-    "${CMAKE_CURRENT_LIST_DIR}/data/stm32g030f6.pdf"
-)
+file(GLOB PDF_RAW_FILES "${CMAKE_CURRENT_LIST_DIR}/data/*.pdf")
+list(LENGTH PDF_RAW_FILES PDF_RAW_FILES_COUNT)
+message(STATUS "Total raw PDF files count: ${PDF_RAW_FILES_COUNT}")
 
 set(DATA_DIR "${CMAKE_CURRENT_BINARY_DIR}/data")
 set(PDF_SEP_DIR "${DATA_DIR}/pdf")
