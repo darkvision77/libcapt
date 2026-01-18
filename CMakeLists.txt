@@ -51,7 +51,7 @@ endif()
 set(LIBCAPT_CONFIG_PATH "${CMAKE_INSTALL_LIBDIR}/cmake/libcapt")
 
 configure_package_config_file(
-    libcaptConfig.cmake.in
+    cmake/libcaptConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/libcaptConfig.cmake
     INSTALL_DESTINATION "${LIBCAPT_CONFIG_PATH}"
 )
