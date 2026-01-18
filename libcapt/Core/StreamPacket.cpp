@@ -39,7 +39,7 @@ namespace Capt {
             return;
         }
         if (this->stream != nullptr && this->stream->good()) {
-            // std::istream::ignore calls unnecessary underflow
+            // std::istream::ignore() calls unnecessary underflow
             for (std::size_t i = 0; i < this->remain; i++) {
                 this->stream->rdbuf()->sbumpc();
             }

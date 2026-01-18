@@ -121,7 +121,7 @@ namespace Capt {
             Protocol::IC_END_PAGE(this->stream);
             return true;
         }
-        inline virtual bool WriteVideoData(const PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
+        virtual inline bool WriteVideoData(const PageParams& params, std::streambuf& videoStream, std::size_t blockSize = 0) {
             return this->WriteVideoData({}, params, videoStream, blockSize);
         }
 
@@ -165,13 +165,13 @@ namespace Capt {
         }
 
         // nullopt if stop requested
-        inline virtual std::optional<ExtendedStatus> WaitPrintEnd(StopTokenType stopToken) {
+        virtual inline std::optional<ExtendedStatus> WaitPrintEnd(StopTokenType stopToken) {
             return this->WaitStatus(stopToken, [](const ExtendedStatus& ex) {
                 return !ex.IsPrinting();
             }, std::chrono::seconds(1));
         }
 
-        inline virtual ExtendedStatus WaitPrintEnd() {
+        virtual inline ExtendedStatus WaitPrintEnd() {
             return this->WaitPrintEnd({}).value();
         }
     };

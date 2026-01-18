@@ -51,13 +51,13 @@ endif()
 set(LIBCAPT_CONFIG_PATH "${CMAKE_INSTALL_LIBDIR}/cmake/libcapt")
 
 configure_package_config_file(
-    cmake/libcaptConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/libcaptConfig.cmake
+    "${PROJECT_SOURCE_DIR}/cmake/libcaptConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/libcaptConfig.cmake"
     INSTALL_DESTINATION "${LIBCAPT_CONFIG_PATH}"
 )
 
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/libcaptConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/libcaptConfigVersion.cmake"
     VERSION "${PROJECT_VERSION}"
     COMPATIBILITY SameMajorVersion
 )

@@ -10,7 +10,7 @@
 #include <sstream>
 
 namespace Capt::Protocol {
-    inline static void checkOpcode(uint16_t actual, uint16_t expected) {
+    static inline void checkOpcode(uint16_t actual, uint16_t expected) {
         if (actual != expected) {
             std::ostringstream ss;
             ss << "unexpected response opcode: 0x";

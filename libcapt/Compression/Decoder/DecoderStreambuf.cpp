@@ -8,7 +8,7 @@
 namespace Capt::Compression {
     #define CLOG(STR) if (this->commandLog) *this->commandLog << STR
     #define CHECK_BOUNDS(PARAM, MIN, MAX) checkBounds(PARAM, MIN, MAX, #PARAM)
-    inline static void checkBounds(int value, int min, int max, std::string_view paramName) {
+    static inline void checkBounds(int value, int min, int max, std::string_view paramName) {
         if (value < min || value > max) {
             std::ostringstream ss;
             ss << paramName << " must be in range [" << min << ';' << max << "], got " << value;
@@ -16,7 +16,7 @@ namespace Capt::Compression {
         }
     }
 
-    inline static uint8_t mustGet(std::streambuf& stream) {
+    static inline uint8_t mustGet(std::streambuf& stream) {
         using traits_type = std::streambuf::traits_type;
         std::streambuf::int_type v = stream.sbumpc();
         if (traits_type::eq_int_type(v, traits_type::eof())) {
@@ -25,7 +25,7 @@ namespace Capt::Compression {
         return traits_type::to_char_type(v);
     }
 
-    inline static std::streamsize mustRead(std::streambuf& stream, std::streambuf::char_type* s, std::streamsize n) {
+    static inline std::streamsize mustRead(std::streambuf& stream, std::streambuf::char_type* s, std::streamsize n) {
         std::streamsize read = stream.sgetn(s, n);
         if (read != n) {
             throw DecoderError("unexpected EOF");
